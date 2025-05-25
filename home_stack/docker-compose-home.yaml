@@ -1,0 +1,54 @@
+name: home_apps
+
+services:
+  homeassistant:
+    container_name: homeassistant
+    image: "ghcr.io/home-assistant/home-assistant:stable"
+    ports:  
+      - ${HASS_PORT}:8123
+    volumes:
+      - /opt/homeassistant/config:/config
+      - /etc/localtime:/etc/localtime:ro
+      - /run/dbus:/run/dbus:ro
+    restart: unless-stopped
+    privileged: true
+    network_mode: host
+
+  zigbee2mqtt:
+    image: ghcr.io/koenkk/zigbee2mqtt
+    container_name: zigbee2mqtt  
+    restart: unless-stopped
+    env:
+      - TZ=Europe/Athens
+    devices:  
+      - /dev/ttyACM0:/dev/ttyACM0  
+    ports:  
+      - ${ZIGBEE2MQTT_WEBUI_PORT}:8080
+    volumes:  
+      - /opt/zigbee2mqtt/data:/app/data  
+      - /run/udev:/run/udev:ro
+    networks:
+      default:
+        ipv4_address: ${ZIGBEE2MQTT_IPV4}
+
+  mosquitto:
+    image: eclipse-mosquitto
+    container_name: mosquitto
+    restart: unless-stopped  
+    volumes:
+      - /opt/mosquitto:/mosquitto
+      - /opt/mosquitto/data:/mosquitto/data
+      - /opt/mosquitto/log:/mosquitto/log
+    ports:
+      - ${MOSQUITTO_MQTT_PORT}:1883
+      - ${MOSQUITTO_WEBSOCKETS_PORT}:9001
+    networks:
+      default:
+        ipv4_address: ${MOSQUITTO_IPV4}
+
+networks:
+  default:
+    ipam:  
+      driver: default
+      config: 
+        - subnet: ${SUBNET}

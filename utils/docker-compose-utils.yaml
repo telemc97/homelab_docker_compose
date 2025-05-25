@@ -1,0 +1,48 @@
+name: utils
+
+services:
+  portainer:
+    container_name: portainer
+    image: portainer/portainer-ce:lts
+    ports:
+      - ${PORTAINER_HTTPS_PORT}:9443
+      - ${PORATINER_HTTP_PORT}:9000
+      - ${PORTAINER_PORT}:8000
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /opt/portainer/data:/data
+    networks:
+      - default
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    restart: unless-stopped
+    volumes:
+      - /opt/grafana:/var/lib/grafana
+    ports:
+     - ${GRAFANA_WEBUI_PORT}:3000
+    networks:
+      - default
+
+  # authelia:
+  #   image: ghcr.io/authelia/authelia
+  #   container_name: authelia
+  #   environment:
+  #     - X_AUTHELIA_CONFIG_FILTERS=template
+  #   volumes:
+  #     - /opt/authelia/config:/config
+  #     - /opt/authelia/secrets:/secrets
+  #   restart: unless-stopped
+  #   ports:
+  #     - 9091:9091
+  #   networks:
+  #     - default
+
+networks:
+  default:
+    ipam:  
+      driver: default
+      config: 
+        - subnet: ${SUBNET}
