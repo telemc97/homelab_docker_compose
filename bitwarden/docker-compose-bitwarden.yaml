@@ -1,0 +1,164 @@
+#
+# Useful references:
+# https://docs.docker.com/reference/compose-file/
+# https://docs.docker.com/reference/cli/docker/compose/#use--f-to-specify-the-name-and-path-of-one-or-more-compose-files
+# https://docs.docker.com/compose/how-tos/environment-variables/envvars/
+#
+#########################################################################
+# WARNING: This file is generated. Do not make changes to this file.    #
+# They will be overwritten on update. If you want to make additions to  #
+# this file, you can create a `docker-compose.override.yml` file in the #
+# same directory and it will be merged into this file at runtime. You   #
+# can also manage various settings used in this file from the           #
+# ./bwdata/config.yml file for your installation.                       #
+#########################################################################
+
+name: bitwarden
+
+services:
+  mssql:
+    image: ghcr.io/bitwarden/mssql:latest
+    container_name: bitwarden-mssql
+    restart: always
+    stop_grace_period: 60s
+    volumes:
+      - ${STORAGE_PATH}/mssql/data:/var/opt/mssql/data
+      - ${STORAGE_PATH}/logs/mssql:/var/opt/mssql/log
+      - ${STORAGE_PATH}/mssql/backups:/etc/bitwarden/mssql/backups
+    networks:
+      - default
+
+  web:
+    image: ghcr.io/bitwarden/web:latest
+    container_name: bitwarden-web
+    restart: always
+    volumes:
+      - ${STORAGE_PATH}/web:/etc/bitwarden/web
+    networks:
+      - default
+      - public
+
+  attachments:
+    image: ghcr.io/bitwarden/attachments:latest
+    container_name: bitwarden-attachments
+    restart: always
+    volumes:
+      - ${STORAGE_PATH}/core/attachments:/etc/bitwarden/core/attachments
+    networks:
+      - default
+      - public
+
+  api:
+    image: ghcr.io/bitwarden/api:latest
+    container_name: bitwarden-api
+    restart: always
+    volumes:
+      - ${STORAGE_PATH}/core:/etc/bitwarden/core
+      - ${STORAGE_PATH}/ca-certificates:/etc/bitwarden/ca-certificates
+      - ${STORAGE_PATH}/logs/api:/etc/bitwarden/logs
+    networks:
+      - default
+      - public
+
+  identity:
+    image: ghcr.io/bitwarden/identity:latest
+    container_name: bitwarden-identity
+    restart: always
+    volumes:
+      - ${STORAGE_PATH}/identity:/etc/bitwarden/identity
+      - ${STORAGE_PATH}/core:/etc/bitwarden/core
+      - ${STORAGE_PATH}/ca-certificates:/etc/bitwarden/ca-certificates
+      - ${STORAGE_PATH}/logs/identity:/etc/bitwarden/logs
+    networks:
+      - default
+      - public
+
+  sso:
+    image: ghcr.io/bitwarden/sso:latest
+    container_name: bitwarden-sso
+    restart: always
+    volumes:
+      - ${STORAGE_PATH}/identity:/etc/bitwarden/identity
+      - ${STORAGE_PATH}/core:/etc/bitwarden/core
+      - ${STORAGE_PATH}/ca-certificates:/etc/bitwarden/ca-certificates
+      - ${STORAGE_PATH}/logs/sso:/etc/bitwarden/logs
+    networks:
+      - default
+      - public
+
+  admin:
+    image: ghcr.io/bitwarden/admin:latest
+    container_name: bitwarden-admin
+    restart: always
+    depends_on:
+      - mssql
+    volumes:
+      - ${STORAGE_PATH}/core:/etc/bitwarden/core
+      - ${STORAGE_PATH}/ca-certificates:/etc/bitwarden/ca-certificates
+      - ${STORAGE_PATH}/logs/admin:/etc/bitwarden/logs
+    networks:
+      - default
+      - public
+
+  icons:
+    image: ghcr.io/bitwarden/icons:latest
+    container_name: bitwarden-icons
+    restart: always
+    volumes:
+      - ${STORAGE_PATH}/ca-certificates:/etc/bitwarden/ca-certificates
+      - ${STORAGE_PATH}/logs/icons:/etc/bitwarden/logs
+    networks:
+      - default
+      - public
+
+  notifications:
+    image: ghcr.io/bitwarden/notifications:latest
+    container_name: bitwarden-notifications
+    restart: always
+    volumes:
+      - ${STORAGE_PATH}/ca-certificates:/etc/bitwarden/ca-certificates
+      - ${STORAGE_PATH}/logs/notifications:/etc/bitwarden/logs
+    networks:
+      - default
+      - public
+
+  events:
+    image: ghcr.io/bitwarden/events:latest
+    container_name: bitwarden-events
+    restart: always
+    volumes:
+      - ${STORAGE_PATH}/ca-certificates:/etc/bitwarden/ca-certificates
+      - ${STORAGE_PATH}/logs/events:/etc/bitwarden/logs
+    networks:
+      - default
+      - public
+
+  nginx:
+    image: ghcr.io/bitwarden/nginx:latest
+    container_name: bitwarden-nginx
+    restart: always
+    depends_on:
+      - web
+      - admin
+      - api
+      - identity
+    ports:
+      - 8080:8080
+    volumes:
+      - ${STORAGE_PATH}/nginx:/etc/bitwarden/nginx
+      - ${STORAGE_PATH}/letsencrypt:/etc/letsencrypt
+      - ${STORAGE_PATH}/ssl:/etc/ssl
+      - ${STORAGE_PATH}/logs/nginx:/var/log/nginx
+    networks:
+      - default
+      - public
+
+networks:
+  default:
+    internal: true
+    ipam:
+      driver: default
+      config: 
+        - subnet: ${SUBNET}
+  caddy_shared:
+    external: true
