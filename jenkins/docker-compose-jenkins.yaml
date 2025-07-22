@@ -16,7 +16,7 @@ services:
     restart: unless-stopped
 
   jenkins:
-    image: myjenkins-blueocean:2.504.3-1
+    image: myjenkins
     container_name: jenkins
     environment:
       - DOCKER_HOST=${DOCKER_HOST}
@@ -32,7 +32,7 @@ services:
     restart: on-failure
 
   agent:
-    image: jenkins/ssh-agent
+    image: myjenkins_agent
     container_name: jenkins-agent
     privileged: true
     user: root
