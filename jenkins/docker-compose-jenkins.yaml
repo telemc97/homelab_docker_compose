@@ -31,13 +31,24 @@ services:
       - ${TCP_PORT}:50000
     restart: on-failure
 
-  agent:
-    image: myjenkins_agent
-    container_name: jenkins-agent
+  agent_devops:
+    image: devops_agent
+    container_name: jenkins_devops_agent
     privileged: true
     user: root
     ports:
-      - ${AGENT_SSH_PORT}:22
+      - ${AGENT_0_SSH_PORT}:22
+    environment:
+      - JENKINS_AGENT_SSH_PUBKEY=${JENKINS_AGENT_SSH_PUBLIC_KEY}
+
+
+  agent_cmake:
+    image: cpp_agent
+    container_name: jenkins_cpp_agent
+    privileged: true
+    user: root
+    ports:
+      - ${AGENT_1_SSH_PORT}:22
     environment:
       - JENKINS_AGENT_SSH_PUBKEY=${JENKINS_AGENT_SSH_PUBLIC_KEY}
 

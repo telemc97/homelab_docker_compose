@@ -14,9 +14,4 @@ RUN apt-get update && \
 # Install Ansible
 RUN apt-get install -y ansible
 
-# Install CMake + Make + GCC/G++
-RUN apt-get update && \
-    apt-get install -y cmake build-essential && \
-    rm -rf /var/lib/apt/lists/*
-
 USER jenkins
