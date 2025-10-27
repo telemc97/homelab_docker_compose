@@ -1,0 +1,15 @@
+name: postgres
+
+services:
+  postgres-db:
+    image: postgres:latest
+    container_name: training-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "646444Telemc"
+      POSTGRES_DB: training_db    
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - /opt/postgres:/var/lib/postgresql/data
+    restart: always
