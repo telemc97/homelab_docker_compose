@@ -15,6 +15,7 @@ RUN apt-get update && \
         python3-pip \
         make \
         curl \
+        libssl-dev \
         ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
