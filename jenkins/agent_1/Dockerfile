@@ -13,6 +13,7 @@ RUN apt-get update && \
         ninja-build \
         python3 \
         python3-pip \
+        python3-venv \
         make \
         curl \
         libssl-dev \
