@@ -4,7 +4,7 @@ services:
   homeassistant:
     container_name: homeassistant
     image: "ghcr.io/home-assistant/home-assistant:stable"
-    ports:  
+    ports:
       - ${HASS_PORT}:8123
     volumes:
       - /opt/homeassistant/config:/config
@@ -18,7 +18,7 @@ services:
     image: ghcr.io/koenkk/zigbee2mqtt
     container_name: zigbee2mqtt  
     restart: unless-stopped
-    env:
+    environment:
       - TZ=Europe/Athens
     devices:  
       - /dev/ttyACM0:/dev/ttyACM0  
