@@ -1,59 +1,87 @@
 # Homelab
-This repository contains the docker-compose configuration for various services hosted in my personal homelab.
 
-## Homelab General Information
-The docker server-VM, used for hosting certain services, is only a part of the homelab server machine. The latter is using Proxmox as its OS. <br>
-There are 3 main VM that are hosted:
+This repository contains the Docker Compose configurations for various services hosted in my personal homelab. The homelab is structured as a series of virtual machines on a Proxmox host, with this repository specifically targeting the **Docker Server VM** (Ubuntu Server).
 
-- **OPNsense** As the home router. OPNsense is an open-source, user-friendly firewall and routing platform
-- **TrueNas** As a NAS solution. Certain cervices store data in TrueNas shares. eg. Immich, Gitea.
-- **Docker Server** A Simple Ubuntu Sever VM running Docker.
-- **Ubuntu Server** This is a server mainly for experimentation.
+## Architecture & General Information
 
-A simple Diagram can be seen in the picture below:
+The Docker Server VM is part of a broader infrastructure running on Proxmox. 
 
-![](img/homelab_simplified.svg)
+The main components of the lab are:
+- **OPNsense**: Primary firewall and router for the home network.
+- **TrueNAS**: Centralized storage. Services like Immich and Gitea use NFS/SMB shares on TrueNAS for persistent data.
+- **Docker Server**: A dedicated Ubuntu Server VM running the services defined in this repository.
+- **Ubuntu Server**: A secondary VM used for testing and isolated experiments.
 
-## Hosted Services:
+### System Diagram
 
-### [Portainer](https://www.portainer.io)
-Portainer is used to manane quickly the different containers.
+```mermaid
+graph TD
+    subgraph Proxmox [Proxmox Host]
+        OPN[OPNsense VM<br/>(Firewall/Router)]
+        NAS[TrueNAS VM<br/>(Storage/NAS)]
+        Exp[Ubuntu Server VM<br/>(Experimentation)]
+        
+        subgraph DockerVM [Docker Server VM]
+            Portainer[Portainer]
+            HASS[Home Assistant]
+            Gitea[Gitea]
+            Book[Bookstack]
+            Caddy[Caddy]
+            Immich[Immich]
+            qBit[qBittorrent]
+            Jenkins[Jenkins]
+        end
+    end
 
-### [HomeAssistant](https://www.home-assistant.io)
-HomeAssistant is used to control smart devices in my home allong with various automations.
+    NAS -.->|Storage| Gitea
+    NAS -.->|Storage| Immich
+    OPN --- DockerVM
+```
 
-### [Gitea](https://about.gitea.com)
-Gitea is used as self-hosted version control and code hosting platform.
+## Hosted Services
 
-### [Bookstack](https://www.bookstackapp.com)
-Bookmark is used primarly for documentation keeping (for the various homelab-specific projects).
+### Core Infrastructure
+- **[Caddy](https://caddyserver.com)**: Acts as the primary reverse proxy with automated SSL. It uses a custom build (`xcaddy`) to include the DuckDNS plugin for DNS-01 challenges, allowing SSL for internal services without exposing ports.
+- **[Portainer](https://www.portainer.io)**: A lightweight management UI that allows for easy monitoring and management of the Docker environment.
+- **[Jenkins](https://www.jenkins.io/)**: The automation hub. Includes a custom controller and three specialized agents:
+  - `agent_0`: Infrastructure tools (Terraform, Ansible).
+  - `agent_1`: Build tools (C++, CMake, GCC).
+  - `agent_2`: Documentation (LaTeX).
 
-### [Caddy](https://caddyserver.com)
-Caddy is a self hosted server solution that is used for exposing certain services like HomeAsssistant to the Internet via reverse proxy.
+### Home Automation
+- **[Home Assistant](https://www.home-assistant.io)**: The heart of the smart home, running in `host` network mode for seamless device discovery.
+- **Zigbee2MQTT & Mosquitto**: Handles the Zigbee mesh network and MQTT messaging for home sensors and switches.
 
-### [Immich](https://immich.app)
-Immich is a self-hosted Google Photos alternative. I am currently using mainly for backing up media.
+### Data & Productivity
+- **[Immich](https://immich.app)**: High-performance self-hosted photo and video management solution, configured to store backups directly on the TrueNAS VM.
+- **[Gitea](https://about.gitea.com)**: A painless self-hosted Git service, providing local version control for all homelab projects.
+- **[Bookstack](https://www.bookstackapp.com)**: A simple, self-hosted platform for organizing and storing documentation and wiki content.
 
-### [Qbittorent](https://www.qbittorrent.org)
-This is a simple torrent client. Hosting it in the homelab gives the ability to access it from any device in the home network and donwload torrents directly to the home NAS.
+### Media & Utilities
+- **[qBittorrent](https://www.qbittorrent.org)**: A reliable torrent client with a web interface, configured to save downloads directly to the NAS.
+- **[Bitwarden](https://bitwarden.com)**: Secure, self-hosted password management.
 
-### [Jenkins]()
+## Deployment & Maintenance
+
+### Configuration
+- **Environment Variables**: Local `.env` files are used extensively for sensitive data and system-specific paths. These are ignored by Git.
+- **Storage**: Persistent data is generally stored in `/opt/` or on mapped network shares from TrueNAS.
+- **Networking**: Most services run on a custom bridge network with static IP assignments for consistent internal routing.
 
 ## Future Plans
-- Addition of another Proxmox node mainly for data backup but also for high availability.
-- Implementation of a VPN solution to ease remote development (outside of home network).
-- With the a addition of a second node migrating from docker to K8S sould be high priority.
 
-## FAQ
+### Infrastructure Evolution
+- **High Availability**: Adding a second Proxmox node for failover and redundant storage.
+- **VPN Integration**: Implementing a WireGuard or Tailscale solution for secure remote access.
+- **Kubernetes**: Planning a migration from Docker Compose to K3s once additional hardware is available.
 
-### Question
-Why Docker and no Kubernetes.<br>
-<br>
-**Answer:** <br> 
-- Simplicity since there is currenly only one node and no high availability can be achieved.
-- Setup time is minimal.
-- Simple Networking.
-- Lightweight compared to a single node Kubernetes setup.
-
-
-
+### Docker Best Practices & Hardening
+- **Resource Quotas**: Implement CPU and Memory limits across all services to prevent resource starvation and improve host stability.
+- **Security Hardening**:
+  - Transition services to run as non-root users where supported.
+  - Implement `read_only: true` for root filesystems with specific `tmpfs` mounts for temporary data.
+  - Utilize `cap_drop: [ALL]` and only add back necessary capabilities to minimize the attack surface.
+- **Reliability & Health**: 
+  - Add `healthcheck` definitions to all critical services (Caddy, Gitea, etc.) for better orchestration and automated recovery.
+  - Implement centralized logging with rotation limits to prevent disk space exhaustion.
+- **Reproducibility**: Move away from `latest` image tags in favor of pinned versions to ensure consistent and predictable deployments.
