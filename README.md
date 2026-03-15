@@ -17,13 +17,13 @@ The main components of the lab are:
 ```mermaid
 graph TD
     subgraph Proxmox [Proxmox Host]
-        OPN[OPNsense VM<br/>(Firewall/Router)]
-        NAS[TrueNAS VM<br/>(Storage/NAS)]
-        Exp[Ubuntu Server VM<br/>(Experimentation)]
+        OPN["OPNsense VM<br/>(Firewall/Router)"]
+        NAS["TrueNAS VM<br/>(Storage/NAS)"]
+        Exp["Ubuntu Server VM<br/>(Experimentation)"]
         
         subgraph DockerVM [Docker Server VM]
             Portainer[Portainer]
-            HASS[Home Assistant]
+            HASS["Home Assistant"]
             Gitea[Gitea]
             Book[Bookstack]
             Caddy[Caddy]
