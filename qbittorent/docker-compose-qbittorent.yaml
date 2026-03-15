@@ -10,10 +10,6 @@ services:
       - TZ=Europe/Athens
       - WEBUI_PORT=${QBIT_WEBUI_PORT}
       - TORRENTING_PORT=6881
-    # ports:
-    #   - ${QBIT_WEBUI_PORT}:${QBIT_WEBUI_PORT}
-    #   - ${QBIT_TCP_PORT}:6881
-    #   - ${QBIT_UDP_PORT}:6881/udp
     volumes:
       - /opt/qbittorrent/appdata:/config
       - /mnt/torrents-share/downloads:/downloads
