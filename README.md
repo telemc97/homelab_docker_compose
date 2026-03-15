@@ -8,34 +8,39 @@ The Docker Server VM is part of a broader infrastructure running on Proxmox.
 
 The main components of the lab are:
 - **OPNsense**: Primary firewall and router for the home network.
-- **TrueNAS**: Centralized storage. Services like Immich and Gitea use NFS/SMB shares on TrueNAS for persistent data.
-- **Docker Server**: A dedicated Ubuntu Server VM running the services defined in this repository.
-- **Ubuntu Server**: A secondary VM used for testing and isolated experiments.
+- **TrueNAS**: Centralized storage. Services like Immich, Gitea, and qBittorrent use NFS/SMB shares on TrueNAS for persistent data and media storage.
+- **Docker Server**: A dedicated Ubuntu Server VM running the primary application stack and the Jenkins Controller.
+- **Control Node**: A dedicated VM hosting specialized Jenkins build agents (agent_0, agent_1, agent_2).
 
 ### System Diagram
 
 ```mermaid
 graph TD
-    subgraph Proxmox [Proxmox Host]
+    subgraph Proxmox ["Proxmox Host"]
         OPN["OPNsense VM<br/>(Firewall/Router)"]
         NAS["TrueNAS VM<br/>(Storage/NAS)"]
-        Exp["Ubuntu Server VM<br/>(Experimentation)"]
-        
-        subgraph DockerVM [Docker Server VM]
-            Portainer[Portainer]
+
+        subgraph CtrlVM ["Control Node VM"]
+            Agents["Jenkins Build Agents<br/>(agent_0, agent_1, agent_2)"]
+        end
+
+        subgraph DockerVM ["Docker Server VM"]
+            Portainer["Portainer"]
             HASS["Home Assistant"]
-            Gitea[Gitea]
-            Book[Bookstack]
-            Caddy[Caddy]
-            Immich[Immich]
-            qBit[qBittorrent]
-            Jenkins[Jenkins]
+            Gitea["Gitea"]
+            Book["Bookstack"]
+            Caddy["Caddy"]
+            Immich["Immich"]
+            qBit["qBittorrent"]
+            Jenkins["Jenkins Controller"]
         end
     end
 
-    NAS -.->|Storage| Gitea
-    NAS -.->|Storage| Immich
+    NAS -.->|"Storage"| Gitea
+    NAS -.->|"Storage"| Immich
+    NAS -.->|"Storage"| qBit
     OPN --- DockerVM
+    OPN --- CtrlVM
 ```
 
 ## Hosted Services
@@ -43,7 +48,7 @@ graph TD
 ### Core Infrastructure
 - **[Caddy](https://caddyserver.com)**: Acts as the primary reverse proxy with automated SSL. It uses a custom build (`xcaddy`) to include the DuckDNS plugin for DNS-01 challenges, allowing SSL for internal services without exposing ports.
 - **[Portainer](https://www.portainer.io)**: A lightweight management UI that allows for easy monitoring and management of the Docker environment.
-- **[Jenkins](https://www.jenkins.io/)**: The automation hub. Includes a custom controller and three specialized agents:
+- **[Jenkins](https://www.jenkins.io/)**: The automation hub. The controller runs on the Docker Server, while specialized agents run on the Control Node:
   - `agent_0`: Infrastructure tools (Terraform, Ansible).
   - `agent_1`: Build tools (C++, CMake, GCC).
   - `agent_2`: Documentation (LaTeX).
