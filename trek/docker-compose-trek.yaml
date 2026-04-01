@@ -1,0 +1,22 @@
+name: trek
+
+services:
+  trek:
+    image: mauriceboe/trek:latest
+    container_name: trek
+    ports:
+      - "${UI_PORT}:${UI_PORT}"
+    environment:
+      - NODE_ENV=production
+      - PORT=${UI_PORT}
+    volumes:
+      - ${BASE_PATH_TREK}/data:/app/data
+      - ${BASE_PATH_TREK}/uploads:/app/uploads
+    restart: unless-stopped
+
+networks:
+  default:
+    ipam:  
+      driver: default
+      config: 
+        - subnet: ${SUBNET}

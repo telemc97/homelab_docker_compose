@@ -1,0 +1,26 @@
+name: caddy
+
+services:
+  caddy:
+    build: .
+    container_name: caddy
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    ports:
+      - ${HTTP_PORT}:80
+      - ${HTTPS_PORT}:443
+    volumes:
+      - ${BASE_PATH_CADDY}:/etc/caddy
+      - ${BASE_PATH_CADDY}/data:/data/caddy
+      - ${BASE_PATH_CADDY}/config:/config/caddy
+    networks:
+      default:
+        ipv4_address: ${CADDY_IPV4}
+
+networks:
+  default:
+    ipam:  
+      driver: default
+      config: 
+        - subnet: ${SUBNET}

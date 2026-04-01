@@ -1,0 +1,72 @@
+name: jenkins
+
+services:
+  jenkins-dind:
+    image: docker:dind
+    container_name: jenkins-dind
+    privileged: true
+    environment:
+      - DOCKER_TLS_CERTDIR=${DOCKER_TLS_CERTDIR}
+    volumes:
+      - ${BASE_PATH_JENKINS}/certs:/certs/client
+      - ${BASE_PATH_JENKINS}/jenkins_home:/var/jenkins_home
+    ports:
+      - "${DAEMON_PORT}:2376"
+    command: ["--storage-driver", "overlay2"]
+    restart: unless-stopped
+
+  jenkins:
+    image: myjenkins
+    container_name: jenkins
+    environment:
+      - DOCKER_HOST=${DOCKER_HOST}
+      - DOCKER_CERT_PATH=${DOCKER_CERT_PATH}
+      - DOCKER_TLS_VERIFY=${DOCKER_TLS_VERIFY}
+    user: root
+    volumes:
+      - ${BASE_PATH_JENKINS}/jenkins_home:/var/jenkins_home
+      - ${BASE_PATH_JENKINS}/certs:/certs/client:ro
+    ports:
+      - ${JENKINS_WEBUI_PORT}:8080
+      - ${TCP_PORT}:50000
+    restart: on-failure
+
+  # Tools on agent_0 terraform, ansible
+  agent_0:
+    image: agent_0
+    container_name: agent_0
+    privileged: true
+    user: root
+    ports:
+      - ${AGENT_0_SSH_PORT}:22
+    environment:
+      - JENKINS_AGENT_SSH_PUBKEY=${JENKINS_AGENT_SSH_PUBLIC_KEY}
+
+  # Tools on agent_1: cpp, cmake, gcc, make, etc
+  agent_1:
+    image: agent_1
+    container_name: agent_1
+    privileged: true
+    user: root
+    ports:
+      - ${AGENT_1_SSH_PORT}:22
+    environment:
+      - JENKINS_AGENT_SSH_PUBKEY=${JENKINS_AGENT_SSH_PUBLIC_KEY}
+
+  # Latex Building
+  agent_2:
+    image: agent_2
+    container_name: agent_2
+    privileged: true
+    user: root
+    ports:
+      - ${AGENT_2_SSH_PORT}:22
+    environment:
+      - JENKINS_AGENT_SSH_PUBKEY=${JENKINS_AGENT_SSH_PUBLIC_KEY}
+
+networks:
+  default:
+    ipam:  
+      driver: default
+      config: 
+        - subnet: ${SUBNET}
