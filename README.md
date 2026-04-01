@@ -33,6 +33,7 @@ graph TD
             Immich["Immich"]
             qBit["qBittorrent"]
             Jenkins["Jenkins Controller"]
+            AI["Open WebUI"]
         end
     end
 
@@ -57,6 +58,9 @@ graph TD
 ### Home Automation
 - **[Home Assistant](https://www.home-assistant.io)**: The heart of the smart home, running in `host` network mode for seamless device discovery.
 - **Zigbee2MQTT & Mosquitto**: Handles the Zigbee mesh network and MQTT messaging for home sensors and switches.
+
+### AI Tools
+- **[Open WebUI](https://openwebui.com)**: A ChatGPT-like interface for interacting with various LLMs (typically connecting to an external Ollama instance).
 
 ### Data & Productivity
 - **[Immich](https://immich.app)**: High-performance self-hosted photo and video management solution, configured to store backups directly on the TrueNAS VM.
