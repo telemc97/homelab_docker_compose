@@ -8,6 +8,7 @@ RUN apt-get update && \
         git \
         cmake \
         build-essential \
+        libgtest-dev \
         gcc-arm-none-eabi \
         libnewlib-arm-none-eabi \
         ninja-build \
