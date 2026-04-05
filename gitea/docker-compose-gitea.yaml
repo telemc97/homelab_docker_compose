@@ -23,6 +23,14 @@ services:
       - ${GITEA_SSH_PORT}:22
     depends_on:
       - db
+    deploy:
+      resources:
+        limits:
+          cpus: '${GITEA_CPU_LIMIT:-0.5}'
+          memory: ${GITEA_MEM_LIMIT:-512M}
+        reservations:
+          cpus: '${GITEA_CPU_RESERVATION:-0.1}'
+          memory: ${GITEA_MEM_RESERVATION:-128M}
 
   db:
     image: docker.io/library/postgres:14
@@ -36,6 +44,14 @@ services:
       - ${MAIN_PATH}/postgres:/var/lib/postgresql/data
     ports:
       - ${DB_PORT}:5432
+    deploy:
+      resources:
+        limits:
+          cpus: '${GITEA_DB_CPU_LIMIT:-1.0}'
+          memory: ${GITEA_DB_MEM_LIMIT:-1G}
+        reservations:
+          cpus: '${GITEA_DB_CPU_RESERVATION:-0.2}'
+          memory: ${GITEA_DB_MEM_RESERVATION:-256M}
 
 networks:
   default:

@@ -89,6 +89,29 @@ The following scripts are available in the `scripts/` directory to automate comm
     *   **Flags**: `-d` sets a custom backup destination (default: `backups/`); `-v` enables verbose output.
 *   **`caddy/deploy_caddyfile.sh`**: Securely deploys the `Caddyfile` to the host directory defined by `${BASE_PATH_CADDY}`, ensuring correct ownership (`root:root`) and permissions (`644`).
 
+## Environment Configuration
+
+A `.env` file should be present in each service directory. These files are used to define system-specific paths, ports, and resource quotas. Below is an indicative sample for a single service (e.g., `gitea/.env`):
+
+```env
+# --- Network ---
+SUBNET=X.X.X.X/X
+GITEA_IPV4=X.X.X.X
+
+# --- Persistence ---
+MAIN_PATH=/path/to/your/storage
+
+# --- Ports ---
+GITEA_WEBUI_PORT=XXXX
+GITEA_SSH_PORT=XXXX
+
+# --- Resource Quotas ---
+GITEA_CPU_LIMIT=0.5
+GITEA_MEM_LIMIT=512M
+GITEA_CPU_RESERV=0.1
+GITEA_MEM_RESERV=128M
+```
+
 ## Future Plans
 
 ### Maintenance & Developer Experience (DX)
