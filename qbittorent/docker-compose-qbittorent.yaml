@@ -4,6 +4,14 @@ services:
   qbittorrent:
     image: lscr.io/linuxserver/qbittorrent:latest
     container_name: qbittorrent
+    deploy:
+      resources:
+        limits:
+          cpus: '${QBIT_CPU_LIMIT:-1.0}'
+          memory: '${QBIT_MEM_LIMIT:-1G}'
+        reservations:
+          cpus: '${QBIT_CPU_RESERV:-0.2}'
+          memory: '${QBIT_MEM_RESERV:-256M}'
     environment:
       - PUID=1000
       - PGID=1000
@@ -19,6 +27,14 @@ services:
   gluetun:
     image: qmcgaw/gluetun:latest
     container_name: gluetun
+    deploy:
+      resources:
+        limits:
+          cpus: '${GLUETUN_CPU_LIMIT:-0.5}'
+          memory: '${GLUETUN_MEM_LIMIT:-512M}'
+        reservations:
+          cpus: '${GLUETUN_CPU_RESERV:-0.1}'
+          memory: '${GLUETUN_MEM_RESERV:-128M}'
     cap_add:
       - NET_ADMIN
     devices:

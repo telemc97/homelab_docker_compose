@@ -13,6 +13,14 @@ services:
       - ${BASE_PATH_OPENWEBUI}:/app/backend/data
     ports:
       - ${OPENWEBUI_PORT}:8080
+    deploy:
+      resources:
+        limits:
+          cpus: '${OPEN_WEBUI_CPU_LIMIT:-2.0}'
+          memory: ${OPEN_WEBUI_MEM_LIMIT:-4G}
+        reservations:
+          cpus: '${OPEN_WEBUI_CPU_RESERVATION:-0.5}'
+          memory: ${OPEN_WEBUI_MEM_RESERVATION:-1G}
 
 networks:
   default:

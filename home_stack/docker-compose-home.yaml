@@ -13,6 +13,14 @@ services:
     restart: unless-stopped
     privileged: true
     network_mode: host
+    deploy:
+      resources:
+        limits:
+          cpus: '${HASS_CPU_LIMIT:-0.5}'
+          memory: ${HASS_MEM_LIMIT:-512M}
+        reservations:
+          cpus: '${HASS_CPU_RESERVATION:-0.1}'
+          memory: ${HASS_MEM_RESERVATION:-128M}
 
   zigbee2mqtt:
     image: ghcr.io/koenkk/zigbee2mqtt
@@ -30,6 +38,14 @@ services:
     networks:
       default:
         ipv4_address: ${ZIGBEE2MQTT_IPV4}
+    deploy:
+      resources:
+        limits:
+          cpus: '${ZIGBEE2MQTT_CPU_LIMIT:-0.5}'
+          memory: ${ZIGBEE2MQTT_MEM_LIMIT:-512M}
+        reservations:
+          cpus: '${ZIGBEE2MQTT_CPU_RESERVATION:-0.1}'
+          memory: ${ZIGBEE2MQTT_MEM_RESERVATION:-128M}
 
   mosquitto:
     image: eclipse-mosquitto
@@ -45,6 +61,14 @@ services:
     networks:
       default:
         ipv4_address: ${MOSQUITTO_IPV4}
+    deploy:
+      resources:
+        limits:
+          cpus: '${MOSQUITTO_CPU_LIMIT:-0.5}'
+          memory: ${MOSQUITTO_MEM_LIMIT:-512M}
+        reservations:
+          cpus: '${MOSQUITTO_CPU_RESERVATION:-0.1}'
+          memory: ${MOSQUITTO_MEM_RESERVATION:-128M}
 
 networks:
   default:
