@@ -1,0 +1,45 @@
+name: vaultwarden
+
+services:
+  vaultwarden:
+    image: vaultwarden/server:latest
+    container_name: vaultwarden
+    restart: always
+    environment:
+      - DATABASE_URL=mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@vaultwarden-db:3306/${MYSQL_DATABASE}
+      - SIGNUPS_ALLOWED=true   # Set to false after creating your first user
+      - WEBSOCKET_ENABLED=true # Enables real-time sync
+      - DOMAIN=https://vault.${DOMAIN_NAME}
+    volumes:
+      - ${STORAGE_PATH}/vaultwarden:/data
+    networks:
+      - caddy_shared
+      - internal
+    depends_on:
+      vaultwarden-db:
+        condition: service_healthy
+
+  vaultwarden-db:
+    image: mariadb:11
+    container_name: vaultwarden-db
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    volumes:
+      - ${STORAGE_PATH}/vaultwarden/db:/var/lib/mysql
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+networks:
+  internal:
+    internal: true
+  caddy_shared:
+    external: true
