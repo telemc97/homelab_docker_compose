@@ -69,7 +69,7 @@ graph TD
 
 ### Media & Utilities
 - **[qBittorrent](https://www.qbittorrent.org)**: A reliable torrent client with a web interface, configured to save downloads directly to the NAS.
-- **[Bitwarden](https://bitwarden.com)**: Secure, self-hosted password management.
+- **[Vaultwarden](https://github.com/dani-garcia/vaultwarden)**: Secure, self-hosted password management.
 
 ## Deployment & Maintenance
 
