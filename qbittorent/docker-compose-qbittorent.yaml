@@ -10,8 +10,8 @@ services:
           cpus: '${QBIT_CPU_LIMIT:-1.0}'
           memory: '${QBIT_MEM_LIMIT:-1G}'
         reservations:
-          cpus: '${QBIT_CPU_RESERV:-0.2}'
-          memory: '${QBIT_MEM_RESERV:-256M}'
+          cpus: '${QBIT_CPU_RESERVATION:-0.2}'
+          memory: '${QBIT_MEM_RESERVATION:-256M}'
     environment:
       - PUID=1000
       - PGID=1000
@@ -36,8 +36,8 @@ services:
           cpus: '${GLUETUN_CPU_LIMIT:-0.5}'
           memory: '${GLUETUN_MEM_LIMIT:-512M}'
         reservations:
-          cpus: '${GLUETUN_CPU_RESERV:-0.1}'
-          memory: '${GLUETUN_MEM_RESERV:-128M}'
+          cpus: '${GLUETUN_CPU_RESERVATION:-0.1}'
+          memory: '${GLUETUN_MEM_RESERVATION:-128M}'
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s

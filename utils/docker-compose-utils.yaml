@@ -10,8 +10,8 @@ services:
           cpus: '${PORTAINER_CPU_LIMIT:-0.5}'
           memory: '${PORTAINER_MEM_LIMIT:-512M}'
         reservations:
-          cpus: '${PORTAINER_CPU_RESERV:-0.1}'
-          memory: '${PORTAINER_MEM_RESERV:-128M}'
+          cpus: '${PORTAINER_CPU_RESERVATION:-0.1}'
+          memory: '${PORTAINER_MEM_RESERVATION:-128M}'
     healthcheck:
       test: ["CMD", "curl", "-f", "https://localhost:9443/"]
       interval: 30s
@@ -36,8 +36,8 @@ services:
           cpus: '${GRAFANA_CPU_LIMIT:-0.5}'
           memory: '${GRAFANA_MEM_LIMIT:-1G}'
         reservations:
-          cpus: '${GRAFANA_CPU_RESERV:-0.2}'
-          memory: '${GRAFANA_MEM_RESERV:-256M}'
+          cpus: '${GRAFANA_CPU_RESERVATION:-0.2}'
+          memory: '${GRAFANA_MEM_RESERVATION:-256M}'
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
       interval: 30s
