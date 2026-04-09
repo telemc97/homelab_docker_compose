@@ -11,8 +11,8 @@ services:
           cpus: '${JENKINS_DIND_CPU_LIMIT:-1.0}'
           memory: '${JENKINS_DIND_MEM_LIMIT:-2G}'
         reservations:
-          cpus: '${JENKINS_DIND_CPU_RESERV:-0.2}'
-          memory: '${JENKINS_DIND_MEM_RESERV:-512M}'
+          cpus: '${JENKINS_DIND_CPU_RESERVATION:-0.2}'
+          memory: '${JENKINS_DIND_MEM_RESERVATION:-512M}'
     environment:
       - DOCKER_TLS_CERTDIR=${DOCKER_TLS_CERTDIR}
     volumes:
@@ -32,8 +32,8 @@ services:
           cpus: '${JENKINS_CPU_LIMIT:-2.0}'
           memory: '${JENKINS_MEM_LIMIT:-4G}'
         reservations:
-          cpus: '${JENKINS_CPU_RESERV:-0.5}'
-          memory: '${JENKINS_MEM_RESERV:-1G}'
+          cpus: '${JENKINS_CPU_RESERVATION:-0.5}'
+          memory: '${JENKINS_MEM_RESERVATION:-1G}'
     environment:
       - DOCKER_HOST=${DOCKER_HOST}
       - DOCKER_CERT_PATH=${DOCKER_CERT_PATH}
@@ -59,8 +59,8 @@ services:
           cpus: '${AGENT_0_CPU_LIMIT:-2.0}'
           memory: '${AGENT_0_MEM_LIMIT:-2G}'
         reservations:
-          cpus: '${AGENT_0_CPU_RESERV:-0.5}'
-          memory: '${AGENT_0_MEM_RESERV:-512M}'
+          cpus: '${AGENT_0_CPU_RESERVATION:-0.5}'
+          memory: '${AGENT_0_MEM_RESERVATION:-512M}'
     ports:
       - ${AGENT_0_SSH_PORT}:22
     environment:
@@ -78,8 +78,8 @@ services:
           cpus: '${AGENT_1_CPU_LIMIT:-2.0}'
           memory: '${AGENT_1_MEM_LIMIT:-2G}'
         reservations:
-          cpus: '${AGENT_1_CPU_RESERV:-0.5}'
-          memory: '${AGENT_1_MEM_RESERV:-512M}'
+          cpus: '${AGENT_1_CPU_RESERVATION:-0.5}'
+          memory: '${AGENT_1_MEM_RESERVATION:-512M}'
     ports:
       - ${AGENT_1_SSH_PORT}:22
     environment:
@@ -97,8 +97,8 @@ services:
           cpus: '${AGENT_2_CPU_LIMIT:-2.0}'
           memory: '${AGENT_2_MEM_LIMIT:-2G}'
         reservations:
-          cpus: '${AGENT_2_CPU_RESERV:-0.5}'
-          memory: '${AGENT_2_MEM_RESERV:-512M}'
+          cpus: '${AGENT_2_CPU_RESERVATION:-0.5}'
+          memory: '${AGENT_2_MEM_RESERVATION:-512M}'
     ports:
       - ${AGENT_2_SSH_PORT}:22
     environment:

@@ -22,8 +22,8 @@ services:
           cpus: '${IMMICH_SERVER_CPU_LIMIT:-1.0}'
           memory: '${IMMICH_SERVER_MEM_LIMIT:-1G}'
         reservations:
-          cpus: '${IMMICH_SERVER_CPU_RESERV:-0.2}'
-          memory: '${IMMICH_SERVER_MEM_RESERV:-256M}'
+          cpus: '${IMMICH_SERVER_CPU_RESERVATION:-0.2}'
+          memory: '${IMMICH_SERVER_MEM_RESERVATION:-256M}'
     volumes:
       # Do not edit the next line. If you want to change the media storage location on your system, edit the value of UPLOAD_LOCATION in the .env file
       - ${UPLOAD_LOCATION}:/usr/src/app/upload
@@ -57,8 +57,8 @@ services:
           cpus: '${IMMICH_ML_CPU_LIMIT:-2.0}'
           memory: '${IMMICH_ML_MEM_LIMIT:-4G}'
         reservations:
-          cpus: '${IMMICH_ML_CPU_RESERV:-0.5}'
-          memory: '${IMMICH_ML_MEM_RESERV:-1G}'
+          cpus: '${IMMICH_ML_CPU_RESERVATION:-0.5}'
+          memory: '${IMMICH_ML_MEM_RESERVATION:-1G}'
     volumes:
       - model-cache:/cache
     env_file:
@@ -76,8 +76,8 @@ services:
           cpus: '${IMMICH_REDIS_CPU_LIMIT:-0.5}'
           memory: '${IMMICH_REDIS_MEM_LIMIT:-256M}'
         reservations:
-          cpus: '${IMMICH_REDIS_CPU_RESERV:-0.1}'
-          memory: '${IMMICH_REDIS_MEM_RESERV:-128M}'
+          cpus: '${IMMICH_REDIS_CPU_RESERVATION:-0.1}'
+          memory: '${IMMICH_REDIS_MEM_RESERVATION:-128M}'
     healthcheck:
       test: redis-cli ping || exit 1
     restart: always
@@ -91,8 +91,8 @@ services:
           cpus: '${IMMICH_DB_CPU_LIMIT:-1.0}'
           memory: '${IMMICH_DB_MEM_LIMIT:-1G}'
         reservations:
-          cpus: '${IMMICH_DB_CPU_RESERV:-0.2}'
-          memory: '${IMMICH_DB_MEM_RESERV:-256M}'
+          cpus: '${IMMICH_DB_CPU_RESERVATION:-0.2}'
+          memory: '${IMMICH_DB_MEM_RESERVATION:-256M}'
     environment:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_USER: ${DB_USERNAME}
