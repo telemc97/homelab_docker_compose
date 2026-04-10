@@ -23,6 +23,9 @@ services:
       - /mnt/torrents-share/downloads:/downloads
     restart: unless-stopped
     network_mode: "service:gluetun"
+    depends_on:
+      gluetun:
+        condition: service_healthy
 
   gluetun:
     image: qmcgaw/gluetun:latest
@@ -35,6 +38,11 @@ services:
         reservations:
           cpus: '${GLUETUN_CPU_RESERVATION:-0.1}'
           memory: '${GLUETUN_MEM_RESERVATION:-128M}'
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     cap_add:
       - NET_ADMIN
     devices:

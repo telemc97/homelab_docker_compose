@@ -98,7 +98,7 @@ A `.env` file should be present in each service directory. These files are used 
 SUBNET=X.X.X.X/X
 GITEA_IPV4=X.X.X.X
 
-# --- Persistence ---
+# --- Storage ---
 MAIN_PATH=/path/to/your/storage
 
 # --- Ports ---
@@ -132,6 +132,10 @@ GITEA_MEM_RESERV=128M
   - Implement `read_only: true` for root filesystems with specific `tmpfs` mounts for temporary data.
   - Utilize `cap_drop: [ALL]` and only add back necessary capabilities to minimize the attack surface.
 - **Reliability & Health**: 
-  - Add `healthcheck` definitions to all critical services (Caddy, Gitea, etc.) for better orchestration and automated recovery.
-  - Implement centralized logging with rotation limits to prevent disk space exhaustion.
+  - **Tiered Healthchecks**: Implemented a systematic healthcheck strategy across all services to enable automated recovery and intelligent orchestration:
+    - **Tier 1 (Databases)**: Uses native tools like `pg_isready` (PostgreSQL) and `healthcheck.sh` (MariaDB) to ensure data persistence layers are fully initialized before dependent apps start.
+    - **Tier 2 (Infrastructure)**: Monitors core services like Caddy (via Admin API `:2019/metrics`) and Jenkins to maintain the backbone of the lab.
+    - **Tier 3 (Application Services)**: Employs `curl` or `wget` against internal health endpoints (e.g., `/health`, `/login`) to verify that the application logic is actually responding, not just the container process.
+  - **Dependency Management**: Leverages `depends_on: { condition: service_healthy }` to prevent "cascading failures" during stack startup.
+  - **Logging**: Implemented centralized logging (where supported) to prevent disk space exhaustion.
 - **Reproducibility**: Move away from `latest` image tags in favor of pinned versions to ensure consistent and predictable deployments.

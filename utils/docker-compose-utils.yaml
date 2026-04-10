@@ -12,6 +12,11 @@ services:
         reservations:
           cpus: '${PORTAINER_CPU_RESERVATION:-0.1}'
           memory: '${PORTAINER_MEM_RESERVATION:-128M}'
+    healthcheck:
+      test: ["CMD", "curl", "-f", "https://localhost:9443/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     ports:
       - ${PORTAINER_HTTPS_PORT}:9443
       - ${PORTAINER_PORT}:8000
@@ -33,6 +38,11 @@ services:
         reservations:
           cpus: '${GRAFANA_CPU_RESERVATION:-0.2}'
           memory: '${GRAFANA_MEM_RESERVATION:-256M}'
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     restart: unless-stopped
     volumes:
       - ${BASE_PATH_GRAFANA}:/var/lib/grafana
