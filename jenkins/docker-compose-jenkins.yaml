@@ -22,6 +22,11 @@ services:
       - "${DAEMON_PORT}:2376"
     command: ["--storage-driver", "overlay2"]
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "docker", "ps"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   jenkins:
     image: myjenkins
@@ -46,6 +51,15 @@ services:
       - ${JENKINS_WEBUI_PORT}:8080
       - ${TCP_PORT}:50000
     restart: on-failure
+    depends_on:
+      jenkins-dind:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/login"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
 
   # Tools on agent_0 terraform, ansible
   agent_0:
@@ -65,6 +79,11 @@ services:
       - ${AGENT_0_SSH_PORT}:22
     environment:
       - JENKINS_AGENT_SSH_PUBKEY=${JENKINS_AGENT_SSH_PUBLIC_KEY}
+    healthcheck:
+      test: ["CMD", "ps", "aux", "|", "grep", "sshd"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
 
   # Tools on agent_1: cpp, cmake, gcc, make, etc
   agent_1:
@@ -84,6 +103,11 @@ services:
       - ${AGENT_1_SSH_PORT}:22
     environment:
       - JENKINS_AGENT_SSH_PUBKEY=${JENKINS_AGENT_SSH_PUBLIC_KEY}
+    healthcheck:
+      test: ["CMD", "ps", "aux", "|", "grep", "sshd"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
 
   # Latex Building
   agent_2:
@@ -103,6 +127,11 @@ services:
       - ${AGENT_2_SSH_PORT}:22
     environment:
       - JENKINS_AGENT_SSH_PUBKEY=${JENKINS_AGENT_SSH_PUBLIC_KEY}
+    healthcheck:
+      test: ["CMD", "ps", "aux", "|", "grep", "sshd"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
 
 networks:
   default:

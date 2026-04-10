@@ -37,11 +37,17 @@ services:
     ports:
       - '${IMMICH_WEBUI_PORT}:2283'
     depends_on:
-      - redis
-      - database
+      redis:
+        condition: service_healthy
+      database:
+        condition: service_healthy
     restart: always
     healthcheck:
-      disable: false
+      test: ["CMD", "curl", "-f", "http://localhost:2283/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
 
   immich-machine-learning:
     container_name: immich_machine_learning
@@ -65,7 +71,11 @@ services:
       - .env
     restart: always
     healthcheck:
-      disable: false
+      test: ["CMD", "curl", "-f", "http://localhost:3003/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
 
   redis:
     container_name: immich_redis
