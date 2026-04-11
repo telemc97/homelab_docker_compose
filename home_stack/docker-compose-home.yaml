@@ -21,11 +21,6 @@ services:
         reservations:
           cpus: '${HASS_CPU_RESERVATION:-0.1}'
           memory: ${HASS_MEM_RESERVATION:-128M}
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8123/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
   zigbee2mqtt:
     image: ghcr.io/koenkk/zigbee2mqtt
@@ -51,11 +46,6 @@ services:
         reservations:
           cpus: '${ZIGBEE2MQTT_CPU_RESERVATION:-0.1}'
           memory: ${ZIGBEE2MQTT_MEM_RESERVATION:-128M}
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
   mosquitto:
     image: eclipse-mosquitto
@@ -79,11 +69,6 @@ services:
         reservations:
           cpus: '${MOSQUITTO_CPU_RESERVATION:-0.1}'
           memory: ${MOSQUITTO_MEM_RESERVATION:-128M}
-    healthcheck:
-      test: ["CMD", "mosquitto_sub", "-t", "$SYS/#", "-C", "1", "-u", "healthcheck", "-P", "healthcheck"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
 networks:
   default:

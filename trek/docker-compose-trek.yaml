@@ -12,11 +12,6 @@ services:
         reservations:
           cpus: '${TREK_CPU_RESERVATION:-0.1}'
           memory: '${TREK_MEM_RESERVATION:-128M}'
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:${UI_PORT}/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
     ports:
       - "${UI_PORT}:${UI_PORT}"
     environment:
