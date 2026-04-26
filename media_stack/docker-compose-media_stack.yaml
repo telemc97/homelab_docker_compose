@@ -1,0 +1,232 @@
+name: media_stack
+
+services:
+  gluetun:
+    image: qmcgaw/gluetun:latest
+    container_name: gluetun
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '${GLUETUN_CPU_LIMIT:-0.5}'
+          memory: '${GLUETUN_MEM_LIMIT:-512M}'
+        reservations:
+          cpus: '${GLUETUN_CPU_RESERVATION:-0.1}'
+          memory: '${GLUETUN_MEM_RESERVATION:-128M}'
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - VPN_SERVICE_PROVIDER=${VPN_SERVICE_PROVIDER}
+      - VPN_TYPE=${VPN_TYPE}
+      - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY}
+      - WIREGUARD_ADDRESSES=${WIREGUARD_ADDRESSES}
+      - TZ=${TZ}
+    volumes:
+      - ${BASE_PATH_GLUETUN}:/gluetun
+    ports:
+      # Jellyfin
+      - ${JELLYFIN_PORT}:8096
+      # Sonarr
+      - ${SONARR_PORT}:8989
+      # Radarr
+      - ${RADARR_PORT}:7878
+      # Bazarr
+      - ${BAZARR_PORT}:6767
+      # Jellyseerr
+      - ${JELLYSEERR_PORT}:5055
+      # Jackett
+      - ${JACKETT_PORT}:9117
+      # Transmission
+      - ${TRANSMISSION_PORT}:9091
+      - ${TRANSMISSION_PEER_PORT}:51413
+      - ${TRANSMISSION_PEER_PORT}:51413/udp
+    networks:
+      default:
+        ipv4_address: ${GLUETUN_IPV4}
+
+  jellyfin:
+    image: jellyfin/jellyfin:${JELLYFIN_VERSION:-stable}
+    container_name: jellyfin
+    restart: unless-stopped
+    network_mode: "service:gluetun"
+    depends_on:
+      gluetun:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '${JELLYFIN_CPU_LIMIT:-2.0}'
+          memory: '${JELLYFIN_MEM_LIMIT:-4G}'
+        reservations:
+          cpus: '${JELLYFIN_CPU_RESERVATION:-0.5}'
+          memory: '${JELLYFIN_MEM_RESERVATION:-512M}'
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${BASE_PATH_JELLYFIN}/config:/config
+      - ${TV_SHOWS_PATH}:/data/tvshows
+      - ${MOVIES_PATH}:/data/movies
+
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:${SONARR_VERSION:-latest}
+    container_name: sonarr
+    restart: unless-stopped
+    network_mode: "service:gluetun"
+    depends_on:
+      gluetun:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '${SONARR_CPU_LIMIT:-0.5}'
+          memory: '${SONARR_MEM_LIMIT:-1G}'
+        reservations:
+          cpus: '${SONARR_CPU_RESERVATION:-0.1}'
+          memory: '${SONARR_MEM_RESERVATION:-256M}'
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${BASE_PATH_SONARR}/config:/config
+      - ${TV_SHOWS_PATH}:/data/tvshows
+      - ${DOWNLOADS_PATH}:/data/downloads
+
+  radarr:
+    image: lscr.io/linuxserver/radarr:${RADARR_VERSION:-latest}
+    container_name: radarr
+    restart: unless-stopped
+    network_mode: "service:gluetun"
+    depends_on:
+      gluetun:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '${RADARR_CPU_LIMIT:-0.5}'
+          memory: '${RADARR_MEM_LIMIT:-1G}'
+        reservations:
+          cpus: '${RADARR_CPU_RESERVATION:-0.1}'
+          memory: '${RADARR_MEM_RESERVATION:-256M}'
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${BASE_PATH_RADARR}/config:/config
+      - ${MOVIES_PATH}:/data/movies
+      - ${DOWNLOADS_PATH}:/data/downloads
+
+  bazarr:
+    image: lscr.io/linuxserver/bazarr:${BAZARR_VERSION:-latest}
+    container_name: bazarr
+    restart: unless-stopped
+    network_mode: "service:gluetun"
+    depends_on:
+      gluetun:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '${BAZARR_CPU_LIMIT:-0.5}'
+          memory: '${BAZARR_MEM_LIMIT:-1G}'
+        reservations:
+          cpus: '${BAZARR_CPU_RESERVATION:-0.1}'
+          memory: '${BAZARR_MEM_RESERVATION:-256M}'
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${BASE_PATH_BAZARR}/config:/config
+      - ${TV_SHOWS_PATH}:/data/tvshows
+      - ${MOVIES_PATH}:/data/movies
+
+  jellyseerr:
+    image: fallenbagel/jellyseerr:${JELLYSEERR_VERSION:-latest}
+    container_name: jellyseerr
+    restart: unless-stopped
+    network_mode: "service:gluetun"
+    depends_on:
+      gluetun:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '${JELLYSEERR_CPU_LIMIT:-0.5}'
+          memory: '${JELLYSEERR_MEM_LIMIT:-512M}'
+        reservations:
+          cpus: '${JELLYSEERR_CPU_RESERVATION:-0.1}'
+          memory: '${JELLYSEERR_MEM_RESERVATION:-128M}'
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - LOG_LEVEL=${JELLYSEERR_LOG_LEVEL:-info}
+    volumes:
+      - ${BASE_PATH_JELLYSEERR}/config:/app/config
+
+  jackett:
+    image: lscr.io/linuxserver/jackett:${JACKETT_VERSION:-latest}
+    container_name: jackett
+    restart: unless-stopped
+    network_mode: "service:gluetun"
+    depends_on:
+      gluetun:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '${JACKETT_CPU_LIMIT:-0.5}'
+          memory: '${JACKETT_MEM_LIMIT:-512M}'
+        reservations:
+          cpus: '${JACKETT_CPU_RESERVATION:-0.1}'
+          memory: '${JACKETT_MEM_RESERVATION:-128M}'
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - AUTO_UPDATE=true
+    volumes:
+      - ${BASE_PATH_JACKETT}/config:/config
+      - ${DOWNLOADS_PATH}:/data/downloads
+
+  transmission:
+    image: lscr.io/linuxserver/transmission:${TRANSMISSION_VERSION:-latest}
+    container_name: transmission
+    restart: unless-stopped
+    network_mode: "service:gluetun"
+    depends_on:
+      gluetun:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '${TRANSMISSION_CPU_LIMIT:-1.0}'
+          memory: '${TRANSMISSION_MEM_LIMIT:-1G}'
+        reservations:
+          cpus: '${TRANSMISSION_CPU_RESERVATION:-0.2}'
+          memory: '${TRANSMISSION_MEM_RESERVATION:-256M}'
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${BASE_PATH_TRANSMISSION}/config:/config
+      - ${DOWNLOADS_PATH}:/data/downloads
+
+networks:
+  default:
+    ipam:  
+      driver: default
+      config: 
+        - subnet: ${SUBNET}
