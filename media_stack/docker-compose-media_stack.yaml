@@ -40,8 +40,8 @@ services:
       - ${RADARR_PORT}:7878
       # Bazarr
       - ${BAZARR_PORT}:6767
-      # Jellyseerr
-      - ${JELLYSEERR_PORT}:5055
+      # Seerr
+      - ${SEERR_PORT}:5055
       # Prowlarr
       - ${PROWLARR_PORT}:9696
       # qBittorrent
@@ -97,7 +97,7 @@ services:
     volumes:
       - ${BASE_PATH_SONARR}/config:/config
       - ${TV_SHOWS_PATH}:/data/tvshows
-      - ${DOWNLOADS_PATH}:/data/downloads
+      - ${DOWNLOADS_PATH}:/downloads
 
   radarr:
     image: lscr.io/linuxserver/radarr:${RADARR_VERSION:-latest}
@@ -122,7 +122,7 @@ services:
     volumes:
       - ${BASE_PATH_RADARR}/config:/config
       - ${MOVIES_PATH}:/data/movies
-      - ${DOWNLOADS_PATH}:/data/downloads
+      - ${DOWNLOADS_PATH}:/downloads
 
   bazarr:
     image: lscr.io/linuxserver/bazarr:${BAZARR_VERSION:-latest}
@@ -149,9 +149,9 @@ services:
       - ${TV_SHOWS_PATH}:/data/tvshows
       - ${MOVIES_PATH}:/data/movies
 
-  jellyseerr:
-    image: fallenbagel/jellyseerr:${JELLYSEERR_VERSION:-latest}
-    container_name: jellyseerr
+  seerr:
+    image: ghcr.io/seerr-team/seerr:${SEERR_VERSION:-latest}
+    container_name: seerr
     restart: unless-stopped
     network_mode: "service:gluetun"
     depends_on:
@@ -160,18 +160,18 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '${JELLYSEERR_CPU_LIMIT:-0.5}'
-          memory: '${JELLYSEERR_MEM_LIMIT:-512M}'
+          cpus: '${SEERR_CPU_LIMIT:-0.5}'
+          memory: '${SEERR_MEM_LIMIT:-512M}'
         reservations:
-          cpus: '${JELLYSEERR_CPU_RESERVATION:-0.1}'
-          memory: '${JELLYSEERR_MEM_RESERVATION:-128M}'
+          cpus: '${SEERR_CPU_RESERVATION:-0.1}'
+          memory: '${SEERR_MEM_RESERVATION:-128M}'
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-      - LOG_LEVEL=${JELLYSEERR_LOG_LEVEL:-info}
+      - LOG_LEVEL=${SEERR_LOG_LEVEL:-info}
     volumes:
-      - ${BASE_PATH_JELLYSEERR}/config:/app/config
+      - ${BASE_PATH_SEERR}/config:/app/config
 
   prowlarr:
     image: lscr.io/linuxserver/prowlarr:${PROWLARR_VERSION:-latest}
@@ -194,7 +194,7 @@ services:
       - PGID=${PGID}
       - TZ=${TZ}
     volumes:
-      - ${BASE_PATH_PROWLARR}/config:/config
+      - ${BASE_PATH_PROWLARR}/config:/app/config
 
   qbittorrent:
     image: lscr.io/linuxserver/qbittorrent:${QBIT_VERSION:-latest}
@@ -220,7 +220,7 @@ services:
       - TORRENTING_PORT=6881
     volumes:
       - ${BASE_PATH_QBITTORRENT}/config:/config
-      - ${DOWNLOADS_PATH}:/data/downloads
+      - ${DOWNLOADS_PATH}:/downloads
 
 networks:
   default:
