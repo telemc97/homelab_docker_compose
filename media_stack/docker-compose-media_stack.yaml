@@ -36,12 +36,15 @@ services:
       - ${BAZARR_PORT}:6767
       # Jellyseerr
       - ${JELLYSEERR_PORT}:5055
-      # Jackett
-      - ${JACKETT_PORT}:9117
-      # Transmission
-      - ${TRANSMISSION_PORT}:9091
-      - ${TRANSMISSION_PEER_PORT}:51413
-      - ${TRANSMISSION_PEER_PORT}:51413/udp
+      # Prowlarr
+      - ${PROWLARR_PORT}:9696
+      # qBittorrent
+      - ${QBIT_WEBUI_PORT}:${QBIT_WEBUI_PORT}
+      - ${QBIT_TCP_PORT}:6881
+      - ${QBIT_UDP_PORT}:6881/udp
+    networks:
+      default:
+        ipv4_address: ${GLUETUN_IPV4}
 
   jellyfin:
     image: jellyfin/jellyfin:${JELLYFIN_VERSION:-latest}
@@ -167,9 +170,9 @@ services:
     volumes:
       - ${BASE_PATH_JELLYSEERR}/config:/app/config
 
-  jackett:
-    image: lscr.io/linuxserver/jackett:${JACKETT_VERSION:-latest}
-    container_name: jackett
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:${PROWLARR_VERSION:-latest}
+    container_name: prowlarr
     restart: unless-stopped
     network_mode: "service:gluetun"
     depends_on:
@@ -178,23 +181,21 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '${JACKETT_CPU_LIMIT:-0.5}'
-          memory: '${JACKETT_MEM_LIMIT:-512M}'
+          cpus: '${PROWLARR_CPU_LIMIT:-0.5}'
+          memory: '${PROWLARR_MEM_LIMIT:-512M}'
         reservations:
-          cpus: '${JACKETT_CPU_RESERVATION:-0.1}'
-          memory: '${JACKETT_MEM_RESERVATION:-128M}'
+          cpus: '${PROWLARR_CPU_RESERVATION:-0.1}'
+          memory: '${PROWLARR_MEM_RESERVATION:-128M}'
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-      - AUTO_UPDATE=true
     volumes:
-      - ${BASE_PATH_JACKETT}/config:/config
-      - ${DOWNLOADS_PATH}:/data/downloads
+      - ${BASE_PATH_PROWLARR}/config:/config
 
-  transmission:
-    image: lscr.io/linuxserver/transmission:${TRANSMISSION_VERSION:-latest}
-    container_name: transmission
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:${QBIT_VERSION:-latest}
+    container_name: qbittorrent
     restart: unless-stopped
     network_mode: "service:gluetun"
     depends_on:
@@ -203,17 +204,19 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '${TRANSMISSION_CPU_LIMIT:-1.0}'
-          memory: '${TRANSMISSION_MEM_LIMIT:-1G}'
+          cpus: '${QBIT_CPU_LIMIT:-1.0}'
+          memory: '${QBIT_MEM_LIMIT:-1G}'
         reservations:
-          cpus: '${TRANSMISSION_CPU_RESERVATION:-0.2}'
-          memory: '${TRANSMISSION_MEM_RESERVATION:-256M}'
+          cpus: '${QBIT_CPU_RESERVATION:-0.2}'
+          memory: '${QBIT_MEM_RESERVATION:-256M}'
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
+      - WEBUI_PORT=${QBIT_WEBUI_PORT}
+      - TORRENTING_PORT=6881
     volumes:
-      - ${BASE_PATH_TRANSMISSION}/config:/config
+      - ${BASE_PATH_QBITTORRENT}/config:/config
       - ${DOWNLOADS_PATH}:/data/downloads
 
 networks:
