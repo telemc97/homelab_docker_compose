@@ -23,6 +23,12 @@ services:
       - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY}
       - WIREGUARD_ADDRESSES=${WIREGUARD_ADDRESSES}
       - TZ=${TZ}
+    healthcheck:
+      test: ["CMD", "/gluetun-entrypoint", "healthcheck"]
+      interval: 5s
+      timeout: 10s
+      retries: 1
+      start_period: 10s
     volumes:
       - ${BASE_PATH_GLUETUN}:/gluetun
     ports:
@@ -42,9 +48,6 @@ services:
       - ${QBIT_WEBUI_PORT}:${QBIT_WEBUI_PORT}
       - ${QBIT_TCP_PORT}:6881
       - ${QBIT_UDP_PORT}:6881/udp
-    networks:
-      default:
-        ipv4_address: ${GLUETUN_IPV4}
 
   jellyfin:
     image: jellyfin/jellyfin:${JELLYFIN_VERSION:-latest}
@@ -195,7 +198,7 @@ services:
 
   qbittorrent:
     image: lscr.io/linuxserver/qbittorrent:${QBIT_VERSION:-latest}
-    container_name: qbittorrent
+    container_name: media-stack-qbittorrent
     restart: unless-stopped
     network_mode: "service:gluetun"
     depends_on:
