@@ -3,7 +3,7 @@ name: media_stack
 services:
   gluetun:
     image: qmcgaw/gluetun:latest
-    container_name: gluetun
+    container_name: media-stack-gluetun
     cap_add:
       - NET_ADMIN
     devices:
@@ -17,11 +17,6 @@ services:
         reservations:
           cpus: '${GLUETUN_CPU_RESERVATION:-0.1}'
           memory: '${GLUETUN_MEM_RESERVATION:-128M}'
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
     environment:
       - VPN_SERVICE_PROVIDER=${VPN_SERVICE_PROVIDER}
       - VPN_TYPE=${VPN_TYPE}
@@ -47,12 +42,9 @@ services:
       - ${TRANSMISSION_PORT}:9091
       - ${TRANSMISSION_PEER_PORT}:51413
       - ${TRANSMISSION_PEER_PORT}:51413/udp
-    networks:
-      default:
-        ipv4_address: ${GLUETUN_IPV4}
 
   jellyfin:
-    image: jellyfin/jellyfin:${JELLYFIN_VERSION:-stable}
+    image: jellyfin/jellyfin:${JELLYFIN_VERSION:-latest}
     container_name: jellyfin
     restart: unless-stopped
     network_mode: "service:gluetun"
