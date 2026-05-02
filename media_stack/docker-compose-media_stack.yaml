@@ -222,6 +222,10 @@ services:
     container_name: recyclarr
     user: ${PUID}:${PGID}
     restart: unless-stopped
+    network_mode: "service:gluetun"
+    depends_on:
+      gluetun:
+        condition: service_healthy
     deploy:
       resources:
         limits:
