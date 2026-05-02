@@ -31,15 +31,24 @@ graph TD
             Book["Bookstack"]
             Caddy["Caddy"]
             Immich["Immich"]
-            qBit["qBittorrent"]
             Jenkins["Jenkins Controller"]
             AI["Open WebUI"]
+            subgraph MediaStack ["Media Stack (VPN Protected)"]
+                Gluetun["Gluetun (VPN)"]
+                qBit["qBittorrent"]
+                Jellyfin["Jellyfin"]
+                Sonarr["Sonarr"]
+                Radarr["Radarr"]
+                Prowl["Prowlarr"]
+                Seerr["Seerr"]
+                Bazarr["Bazarr"]
+            end
         end
     end
 
     NAS -.->|"Storage"| Gitea
     NAS -.->|"Storage"| Immich
-    NAS -.->|"Storage"| qBit
+    NAS -.->|"Storage"| MediaStack
     OPN --- NAS
     OPN --- DockerVM
     OPN --- CtrlVM
@@ -54,6 +63,7 @@ graph TD
   - `agent_0`: Infrastructure tools (Terraform, Ansible).
   - `agent_1`: Build tools (C++, CMake, GCC).
   - `agent_2`: Documentation (LaTeX).
+- **[Gluetun](https://github.com/qdm12/gluetun)**: A dedicated VPN client container (WireGuard/OpenVPN) that acts as a secure gateway for the entire media stack, ensuring all torrent and management traffic is encrypted and anonymized.
 
 ### Home Automation
 - **[Home Assistant](https://www.home-assistant.io)**: The heart of the smart home, running in `host` network mode for seamless device discovery.
@@ -66,10 +76,16 @@ graph TD
 - **[Immich](https://immich.app)**: High-performance self-hosted photo and video management solution, configured to store backups directly on the TrueNAS VM.
 - **[Gitea](https://about.gitea.com)**: A painless self-hosted Git service, providing local version control for all homelab projects.
 - **[Bookstack](https://www.bookstackapp.com)**: A simple, self-hosted platform for organizing and storing documentation and wiki content.
-
-### Media & Utilities
-- **[qBittorrent](https://www.qbittorrent.org)**: A reliable torrent client with a web interface, configured to save downloads directly to the NAS.
 - **[Vaultwarden](https://github.com/dani-garcia/vaultwarden)**: Secure, self-hosted password management.
+
+### Media Stack
+The media stack is a tightly integrated suite of services for automated media management, all routed through a **Gluetun** VPN container for privacy.
+- **[Jellyfin](https://jellyfin.org/)**: The volunteer-built, media solution that puts you in control of your media.
+- **[qBittorrent](https://www.qbittorrent.org)**: A reliable torrent client with a web interface, configured to save downloads directly to the NAS.
+- **[Sonarr](https://sonarr.tv/)** & **[Radarr](https://radarr.video/)**: Smart PVRs for newsgroup and bittorrent users, automatically managing TV shows and movies.
+- **[Prowlarr](https://prowlarr.com/)**: An indexer manager/proxy that integrates with the other "Arrs".
+- **[Seerr (Jellyseerr)](https://github.com/fallenbagel/jellyseerr)**: A request management and media discovery tool for Jellyfin.
+- **[Bazarr](https://www.bazarr.media/)**: Companion application to Sonarr and Radarr that manages and downloads subtitles.
 
 ## Deployment & Maintenance
 

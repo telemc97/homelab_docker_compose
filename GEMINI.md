@@ -13,10 +13,11 @@ The project is organized into service-specific directories, each containing its 
     - Development (C++, CMake, GCC)
     - Documentation (LaTeX)
 - **Home Automation**: Home Assistant (running in host network mode), Zigbee2MQTT, and Mosquitto.
-- **Services**: Immich (Photos), Gitea (Git), Bitwarden (Passwords), Bookstack (Documentation), qBittorrent, Ollama (AI), etc.
+- **Media Stack**: Integrated suite (Jellyfin, Sonarr, Radarr, etc.) routed through a Gluetun VPN.
+- **Services**: Immich (Photos), Gitea (Git), Vaultwarden (Passwords), Bookstack (Documentation), AI Tools (Open WebUI), etc.
 
 ## Directory Structure
-- `bitwarden/`: Bitwarden password manager setup.
+- `ai_tools/`: Open WebUI and other AI-related tools.
 - `bookstack/`: Bookstack documentation platform.
 - `caddy/`: Caddy reverse proxy with custom `xcaddy` build.
 - `frigate/`: Frigate NVR for security cameras.
@@ -24,9 +25,10 @@ The project is organized into service-specific directories, each containing its 
 - `home_stack/`: Home Assistant, Zigbee2MQTT, and Mosquitto.
 - `immich/`: Immich photo/video management solution.
 - `jenkins/`: Jenkins controller and specialized agents (`agent_0`, `agent_1`, `agent_2`).
-- `ollama/`: Ollama for running large language models.
-- `qbittorent/`: qBittorrent client.
+- `media_stack/`: Full media automation suite (Jellyfin, Arrs, qBit) with Gluetun VPN.
+- `qbittorent/`: Independent qBittorrent client (legacy/secondary).
 - `utils/`: Miscellaneous utility services.
+- `vaultwarden/`: Vaultwarden (formerly Bitwarden) password manager.
 
 ## Building and Running
 
