@@ -72,6 +72,9 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
+    group_add:
+      - "${RENDERGID}"
+      - "${VIDEOGID}"
     volumes:
       - ${BASE_PATH_JELLYFIN}/config:/config
       - ${MEDIA_ROOT}:/data
