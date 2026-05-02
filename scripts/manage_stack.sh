@@ -45,10 +45,10 @@ if [ ${#EXCLUDES[@]} -gt 0 ]; then
     echo "----------------------------------"
 fi
 
-# Find all docker-compose-*.yaml files in subdirectories
-# Using -maxdepth 2 to target <service>/docker-compose-<service>.yaml
+# Find all docker-compose.yaml files in subdirectories
+# Using -maxdepth 2 to target <service>/docker-compose.yaml
 # Exclude the 'scripts' directory from the find
-find "$REPO_ROOT" -maxdepth 2 -name "docker-compose-*.yaml" | while read -r compose_file; do
+find "$REPO_ROOT" -maxdepth 2 -name "docker-compose.yaml" | while read -r compose_file; do
     service_dir=$(dirname "$compose_file")
     compose_filename=$(basename "$compose_file")
     service_name=$(basename "$service_dir")

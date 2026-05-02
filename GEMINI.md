@@ -3,7 +3,7 @@
 ## Project Overview
 This repository contains a collection of Docker Compose configurations used for managing a personal homelab. The homelab is structured as a series of virtual machines on a Proxmox host, with this repository specifically targeting the **Docker Server VM** (Ubuntu Server).
 
-The project is organized into service-specific directories, each containing its own `docker-compose-*.yaml` file and associated configurations (like Dockerfiles for custom builds).
+The project is organized into service-specific directories, each containing its own `docker-compose.yaml` file and associated configurations (like Dockerfiles for custom builds).
 
 ### Main Technologies
 - **Docker & Docker Compose**: Primary orchestration tools.
@@ -35,7 +35,7 @@ The project is organized into service-specific directories, each containing its 
 ### General Usage
 To start a service, navigate to its directory and use:
 ```bash
-docker-compose -f docker-compose-<service>.yaml up -d
+docker-compose up -d
 ```
 *Note: Ensure you have a `.env` file in the service directory with the required variables (ports, paths, subnets, etc.) as they are ignored by Git.*
 
