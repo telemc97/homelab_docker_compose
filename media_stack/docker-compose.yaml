@@ -24,6 +24,7 @@ services:
       - WIREGUARD_ADDRESSES=${WIREGUARD_ADDRESSES}
       - TZ=${TZ}
       - DOT=on
+      - DOT_PROVIDERS=${DOT_PROVIDERS:-cloudflare,google}
       - BLOCK_MALICIOUS=on
       - DNS_KEEP_NAMESERVER=on
     healthcheck:
