@@ -31,14 +31,30 @@ graph TD
             Book["Bookstack"]
             Caddy["Caddy"]
             Immich["Immich"]
-            qBit["qBittorrent"]
             Jenkins["Jenkins Controller"]
+            AI["Open WebUI"]
+            subgraph MonitorStack ["Monitoring Stack"]
+                Prom["Prometheus"]
+                Graf["Grafana"]
+                Loki["Loki"]
+                Tail["Promtail"]
+            end
+            subgraph MediaStack ["Media Stack (VPN Protected)"]
+                Gluetun["Gluetun (VPN)"]
+                qBit["qBittorrent"]
+                Jellyfin["Jellyfin"]
+                Sonarr["Sonarr"]
+                Radarr["Radarr"]
+                Prowl["Prowlarr"]
+                Seerr["Seerr"]
+                Bazarr["Bazarr"]
+            end
         end
     end
 
     NAS -.->|"Storage"| Gitea
     NAS -.->|"Storage"| Immich
-    NAS -.->|"Storage"| qBit
+    NAS -.->|"Storage"| MediaStack
     OPN --- NAS
     OPN --- DockerVM
     OPN --- CtrlVM
@@ -53,19 +69,36 @@ graph TD
   - `agent_0`: Infrastructure tools (Terraform, Ansible).
   - `agent_1`: Build tools (C++, CMake, GCC).
   - `agent_2`: Documentation (LaTeX).
+- **[Gluetun](https://github.com/qdm12/gluetun)**: A dedicated VPN client container (WireGuard/OpenVPN) that acts as a secure gateway for the entire media stack, ensuring all torrent and management traffic is encrypted and anonymized.
 
 ### Home Automation
 - **[Home Assistant](https://www.home-assistant.io)**: The heart of the smart home, running in `host` network mode for seamless device discovery.
 - **Zigbee2MQTT & Mosquitto**: Handles the Zigbee mesh network and MQTT messaging for home sensors and switches.
 
+### AI Tools
+- **[Open WebUI](https://openwebui.com)**: A ChatGPT-like interface for interacting with various LLMs (typically connecting to an external Ollama instance).
+
 ### Data & Productivity
 - **[Immich](https://immich.app)**: High-performance self-hosted photo and video management solution, configured to store backups directly on the TrueNAS VM.
 - **[Gitea](https://about.gitea.com)**: A painless self-hosted Git service, providing local version control for all homelab projects.
 - **[Bookstack](https://www.bookstackapp.com)**: A simple, self-hosted platform for organizing and storing documentation and wiki content.
+- **[Vaultwarden](https://github.com/dani-garcia/vaultwarden)**: Secure, self-hosted password management.
 
-### Media & Utilities
+### Media Stack
+The media stack is a tightly integrated suite of services for automated media management, all routed through a **Gluetun** VPN container for privacy.
+- **[Jellyfin](https://jellyfin.org/)**: The volunteer-built, media solution that puts you in control of your media.
 - **[qBittorrent](https://www.qbittorrent.org)**: A reliable torrent client with a web interface, configured to save downloads directly to the NAS.
-- **[Bitwarden](https://bitwarden.com)**: Secure, self-hosted password management.
+- **[Sonarr](https://sonarr.tv/)** & **[Radarr](https://radarr.video/)**: Smart PVRs for newsgroup and bittorrent users, automatically managing TV shows and movies.
+- **[Prowlarr](https://prowlarr.com/)**: An indexer manager/proxy that integrates with the other "Arrs".
+- **[Seerr (Jellyseerr)](https://github.com/fallenbagel/jellyseerr)**: A request management and media discovery tool for Jellyfin.
+- **[Bazarr](https://www.bazarr.media/)**: Companion application to Sonarr and Radarr that manages and downloads subtitles.
+
+### Monitoring & Logging
+The lab features a comprehensive observability stack:
+- **[Prometheus](https://prometheus.io/)**: Core metrics collection and alerting.
+- **[Grafana](https://grafana.com/)**: Primary visualization dashboard for metrics and logs.
+- **[Loki](https://grafana.com/oss/loki/)**: Log aggregation system, seamlessly integrated into Grafana.
+- **[Promtail](https://grafana.com/docs/loki/latest/clients/promtail/)**: Log shipper configured for Docker auto-discovery and log-level extraction.
 
 ## Deployment & Maintenance
 
@@ -84,6 +117,29 @@ The following scripts are available in the `scripts/` directory to automate comm
     *   **Usage**: `./scripts/backup_stack.sh [-d <destination_dir>] [-v]`
     *   **Flags**: `-d` sets a custom backup destination (default: `backups/`); `-v` enables verbose output.
 *   **`caddy/deploy_caddyfile.sh`**: Securely deploys the `Caddyfile` to the host directory defined by `${BASE_PATH_CADDY}`, ensuring correct ownership (`root:root`) and permissions (`644`).
+
+## Environment Configuration
+
+A `.env` file should be present in each service directory. These files are used to define system-specific paths, ports, and resource quotas. Below is an indicative sample for a single service (e.g., `gitea/.env`):
+
+```env
+# --- Network ---
+SUBNET=X.X.X.X/X
+GITEA_IPV4=X.X.X.X
+
+# --- Storage ---
+MAIN_PATH=/path/to/your/storage
+
+# --- Ports ---
+GITEA_WEBUI_PORT=XXXX
+GITEA_SSH_PORT=XXXX
+
+# --- Resource Quotas ---
+GITEA_CPU_LIMIT=0.5
+GITEA_MEM_LIMIT=512M
+GITEA_CPU_RESERV=0.1
+GITEA_MEM_RESERV=128M
+```
 
 ## Future Plans
 
@@ -105,6 +161,10 @@ The following scripts are available in the `scripts/` directory to automate comm
   - Implement `read_only: true` for root filesystems with specific `tmpfs` mounts for temporary data.
   - Utilize `cap_drop: [ALL]` and only add back necessary capabilities to minimize the attack surface.
 - **Reliability & Health**: 
-  - Add `healthcheck` definitions to all critical services (Caddy, Gitea, etc.) for better orchestration and automated recovery.
-  - Implement centralized logging with rotation limits to prevent disk space exhaustion.
+  - **Tiered Healthchecks**: Implemented a systematic healthcheck strategy across all services to enable automated recovery and intelligent orchestration:
+    - **Tier 1 (Databases)**: Uses native tools like `pg_isready` (PostgreSQL) and `healthcheck.sh` (MariaDB) to ensure data persistence layers are fully initialized before dependent apps start.
+    - **Tier 2 (Infrastructure)**: Monitors core services like Caddy (via Admin API `:2019/metrics`) and Jenkins to maintain the backbone of the lab.
+    - **Tier 3 (Application Services)**: Employs `curl` or `wget` against internal health endpoints (e.g., `/health`, `/login`) to verify that the application logic is actually responding, not just the container process.
+  - **Dependency Management**: Leverages `depends_on: { condition: service_healthy }` to prevent "cascading failures" during stack startup.
+  - **Logging**: Implemented centralized logging (where supported) to prevent disk space exhaustion.
 - **Reproducibility**: Move away from `latest` image tags in favor of pinned versions to ensure consistent and predictable deployments.

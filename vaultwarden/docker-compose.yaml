@@ -1,0 +1,55 @@
+name: vaultwarden
+
+services:
+  vaultwarden:
+    image: vaultwarden/server:latest
+    container_name: vaultwarden
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '${VW_CPU_LIMIT:-0.5}'
+          memory: '${VW_MEM_LIMIT:-512M}'
+        reservations:
+          cpus: '${VW_CPU_RESERVATION:-0.1}'
+          memory: '${VW_MEM_RESERVATION:-128M}'
+    environment:
+      - DATABASE_URL=mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@vaultwarden-db:3306/${MYSQL_DATABASE}
+      - SIGNUPS_ALLOWED=true   # Set to false after creating your first user
+      - WEBSOCKET_ENABLED=true # Enables real-time sync
+      - DOMAIN=https://vault.${DOMAIN_NAME}
+    volumes:
+      - ${STORAGE_PATH}/vaultwarden:/data
+    networks:
+      - caddy_shared
+      - internal
+    depends_on:
+      - vaultwarden-db
+  
+  vaultwarden-db:
+    image: mariadb:11
+    container_name: vaultwarden-db
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '${VW_DB_CPU_LIMIT:-1.0}'
+          memory: '${VW_DB_MEM_LIMIT:-1G}'
+        reservations:
+          cpus: '${VW_DB_CPU_RESERVATION:-0.2}'
+          memory: '${VW_DB_MEM_RESERVATION:-256M}'
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    volumes:
+      - ${STORAGE_PATH}/vaultwarden/db:/var/lib/mysql
+    networks:
+      - internal
+
+networks:
+  internal:
+    internal: true
+  caddy_shared:
+    external: true

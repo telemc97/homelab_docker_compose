@@ -3,7 +3,7 @@
 ## Project Overview
 This repository contains a collection of Docker Compose configurations used for managing a personal homelab. The homelab is structured as a series of virtual machines on a Proxmox host, with this repository specifically targeting the **Docker Server VM** (Ubuntu Server).
 
-The project is organized into service-specific directories, each containing its own `docker-compose-*.yaml` file and associated configurations (like Dockerfiles for custom builds).
+The project is organized into service-specific directories, each containing its own `docker-compose.yaml` file and associated configurations (like Dockerfiles for custom builds).
 
 ### Main Technologies
 - **Docker & Docker Compose**: Primary orchestration tools.
@@ -12,11 +12,15 @@ The project is organized into service-specific directories, each containing its 
     - Infrastructure (Terraform, Ansible)
     - Development (C++, CMake, GCC)
     - Documentation (LaTeX)
+- **Monitoring & Observability**: Full stack with Prometheus, Grafana, Loki, and Promtail.
+    - **Metrics**: Prometheus, Node Exporter, and cAdvisor.
+    - **Logging**: Loki for aggregation and Promtail for log-level extraction and Docker discovery.
 - **Home Automation**: Home Assistant (running in host network mode), Zigbee2MQTT, and Mosquitto.
-- **Services**: Immich (Photos), Gitea (Git), Bitwarden (Passwords), Bookstack (Documentation), qBittorrent, Ollama (AI), etc.
+- **Media Stack**: Integrated suite (Jellyfin, Sonarr, Radarr, etc.) routed through a Gluetun VPN.
+- **Services**: Immich (Photos), Gitea (Git), Vaultwarden (Passwords), Bookstack (Documentation), AI Tools (Open WebUI), etc.
 
 ## Directory Structure
-- `bitwarden/`: Bitwarden password manager setup.
+- `ai_tools/`: Open WebUI and other AI-related tools.
 - `bookstack/`: Bookstack documentation platform.
 - `caddy/`: Caddy reverse proxy with custom `xcaddy` build.
 - `frigate/`: Frigate NVR for security cameras.
@@ -24,18 +28,29 @@ The project is organized into service-specific directories, each containing its 
 - `home_stack/`: Home Assistant, Zigbee2MQTT, and Mosquitto.
 - `immich/`: Immich photo/video management solution.
 - `jenkins/`: Jenkins controller and specialized agents (`agent_0`, `agent_1`, `agent_2`).
-- `ollama/`: Ollama for running large language models.
-- `qbittorent/`: qBittorrent client.
+- `media_stack/`: Full media automation suite (Jellyfin, Arrs, qBit) with Gluetun VPN.
+- `monitoring/`: Prometheus, Grafana, Loki, and Promtail setup.
+- `qbittorent/`: Independent qBittorrent client (legacy/secondary).
 - `utils/`: Miscellaneous utility services.
+- `vaultwarden/`: Vaultwarden (formerly Bitwarden) password manager.
 
 ## Building and Running
 
 ### General Usage
 To start a service, navigate to its directory and use:
 ```bash
-docker-compose -f docker-compose-<service>.yaml up -d
+docker-compose up -d
 ```
 *Note: Ensure you have a `.env` file in the service directory with the required variables (ports, paths, subnets, etc.) as they are ignored by Git.*
+
+### Monitoring & Logging
+The monitoring stack in `monitoring/` provides metrics and logs:
+- **Metrics**: Accessed via Grafana at `${GRAFANA_WEBUI_PORT}`.
+- **Logs**: Centralized in Loki. Use the following LogQL in Grafana Explore for a clean, identified view:
+  ```logql
+  {container=~".+"} | line_format "{{.container}} | {{.level}} | {{__line__}}"
+  ```
+- **Log Levels**: Promtail automatically extracts and standardizes levels (INFO, WARN, ERROR) from various log formats.
 
 ### Custom Builds
 Some services require a build step before they can be started:

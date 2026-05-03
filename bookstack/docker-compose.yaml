@@ -30,6 +30,16 @@ services:
     ports:
       - ${BOOKSTACK_PORT}:80
     restart: unless-stopped
+    depends_on:
+      - mariadb
+    deploy:
+      resources:
+        limits:
+          cpus: '${BOOKSTACK_CPU_LIMIT:-0.5}'
+          memory: ${BOOKSTACK_MEM_LIMIT:-512M}
+        reservations:
+          cpus: '${BOOKSTACK_CPU_RESERVATION:-0.1}'
+          memory: ${BOOKSTACK_MEM_RESERVATION:-128M}
 
   mariadb:
     image: lscr.io/linuxserver/mariadb:11.4.4
@@ -37,7 +47,6 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Europe/Athens
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - MYSQL_DATABASE=${MYSQL_DATABASE}
       - MYSQL_USER=${MYSQL_USER}
@@ -45,6 +54,14 @@ services:
     volumes:
       - ${BASE_PATH_BOOKSTACK}/db:/config
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '${MARIADB_CPU_LIMIT:-1.0}'
+          memory: ${MARIADB_MEM_LIMIT:-1G}
+        reservations:
+          cpus: '${MARIADB_CPU_RESERVATION:-0.2}'
+          memory: ${MARIADB_MEM_RESERVATION:-256M}
 
 networks:
   default:

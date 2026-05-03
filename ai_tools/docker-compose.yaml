@@ -1,0 +1,30 @@
+name: ai_tools
+
+services:
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    restart: unless-stopped
+    environment:
+      # Reverse Proxy Settings
+      - USE_X_FORWARDED_HOST=true
+      - USE_X_FORWARDED_PROTO=true
+    volumes:
+      - ${BASE_PATH_OPENWEBUI}:/app/backend/data
+    ports:
+      - ${OPENWEBUI_PORT}:8080
+    deploy:
+      resources:
+        limits:
+          cpus: '${OPEN_WEBUI_CPU_LIMIT:-2.0}'
+          memory: ${OPEN_WEBUI_MEM_LIMIT:-4G}
+        reservations:
+          cpus: '${OPEN_WEBUI_CPU_RESERVATION:-0.5}'
+          memory: ${OPEN_WEBUI_MEM_RESERVATION:-1G}
+
+networks:
+  default:
+    ipam:  
+      driver: default
+      config: 
+        - subnet: ${SUBNET}

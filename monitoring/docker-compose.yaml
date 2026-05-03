@@ -1,0 +1,181 @@
+name: monitoring
+
+services:
+  portainer:
+    container_name: portainer
+    image: portainer/portainer-ce:lts
+    deploy:
+      resources:
+        limits:
+          cpus: '${PORTAINER_CPU_LIMIT:-0.5}'
+          memory: '${PORTAINER_MEM_LIMIT:-512M}'
+        reservations:
+          cpus: '${PORTAINER_CPU_RESERVATION:-0.1}'
+          memory: '${PORTAINER_MEM_RESERVATION:-128M}'
+    ports:
+      - ${PORTAINER_HTTPS_PORT}:9443
+      - ${PORTAINER_PORT}:8000
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${BASE_PATH_PORTAINER}/data:/data
+    networks:
+      - default
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    deploy:
+      resources:
+        limits:
+          cpus: '${GRAFANA_CPU_LIMIT:-0.5}'
+          memory: '${GRAFANA_MEM_LIMIT:-1G}'
+        reservations:
+          cpus: '${GRAFANA_CPU_RESERVATION:-0.2}'
+          memory: '${GRAFANA_MEM_RESERVATION:-256M}'
+    restart: unless-stopped
+    volumes:
+      - ${BASE_PATH_GRAFANA}:/var/lib/grafana
+    ports:
+     - ${GRAFANA_WEBUI_PORT}:3000
+    networks:
+      - default
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: unless-stopped
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ${BASE_PATH_PROMETHEUS}:/prometheus
+    ports:
+      - ${PROMETHEUS_PORT:-9090}:9090
+    networks:
+      - default
+    deploy:
+      resources:
+        limits:
+          cpus: '${PROMETHEUS_CPU_LIMIT:-0.5}'
+          memory: '${PROMETHEUS_MEM_LIMIT:-1G}'
+        reservations:
+          cpus: '${PROMETHEUS_CPU_RESERVATION:-0.1}'
+          memory: '${PROMETHEUS_MEM_RESERVATION:-256M}'
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    restart: unless-stopped
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    networks:
+      - default
+    deploy:
+      resources:
+        limits:
+          cpus: '${NODE_EXPORTER_CPU_LIMIT:-0.2}'
+          memory: '${NODE_EXPORTER_MEM_LIMIT:-128M}'
+        reservations:
+          cpus: '${NODE_EXPORTER_CPU_RESERVATION:-0.1}'
+          memory: '${NODE_EXPORTER_MEM_RESERVATION:-64M}'
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    restart: unless-stopped
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    devices:
+      - /dev/kmsg
+    networks:
+      - default
+    deploy:
+      resources:
+        limits:
+          cpus: '${CADVISOR_CPU_LIMIT:-0.5}'
+          memory: '${CADVISOR_MEM_LIMIT:-512M}'
+        reservations:
+          cpus: '${CADVISOR_CPU_RESERVATION:-0.1}'
+          memory: '${CADVISOR_MEM_RESERVATION:-128M}'
+
+  scraparr:
+    image: ghcr.io/thecfu/scraparr:latest
+    container_name: scraparr
+    restart: unless-stopped
+    environment:
+      - TZ=${TZ}
+      - SONARR_URL=${SONARR_URL}
+      - SONARR_API_KEY=${SONARR_API_KEY}
+      - RADARR_URL=${RADARR_URL}
+      - RADARR_API_KEY=${RADARR_API_KEY}
+      - PROWLARR_URL=${PROWLARR_URL}
+      - PROWLARR_API_KEY=${PROWLARR_API_KEY}
+    networks:
+      - default
+    deploy:
+      resources:
+        limits:
+          cpus: '${SCRAPARR_CPU_LIMIT:-0.2}'
+          memory: '${SCRAPARR_MEM_LIMIT:-256M}'
+        reservations:
+          cpus: '${SCRAPARR_CPU_RESERVATION:-0.1}'
+          memory: '${SCRAPARR_MEM_RESERVATION:-64M}'
+
+  loki:
+    image: grafana/loki:latest
+    container_name: loki
+    volumes:
+      - ./loki-config.yml:/etc/loki/local-config.yaml
+      - ${BASE_PATH_LOKI}:/loki
+    ports:
+      - "${LOKI_PORT:-3100}:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - default
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '${LOKI_CPU_LIMIT:-0.5}'
+          memory: '${LOKI_MEM_LIMIT:-512M}'
+        reservations:
+          cpus: '${LOKI_CPU_RESERVATION:-0.1}'
+          memory: '${LOKI_MEM_RESERVATION:-128M}'
+
+  promtail:
+    image: grafana/promtail:latest
+    container_name: promtail
+    volumes:
+      - ./promtail-config.yml:/etc/promtail/config.yml
+      - /var/log:/var/log:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    command: -config.file=/etc/promtail/config.yml
+    networks:
+      - default
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '${PROMTAIL_CPU_LIMIT:-0.2}'
+          memory: '${PROMTAIL_MEM_LIMIT:-128M}'
+        reservations:
+          cpus: '${PROMTAIL_CPU_RESERVATION:-0.1}'
+          memory: '${PROMTAIL_MEM_RESERVATION:-64M}'
+
+networks:
+  default:
+    ipam:  
+      driver: default
+      config: 
+        - subnet: ${SUBNET}
