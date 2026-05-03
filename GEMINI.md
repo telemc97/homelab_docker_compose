@@ -12,6 +12,9 @@ The project is organized into service-specific directories, each containing its 
     - Infrastructure (Terraform, Ansible)
     - Development (C++, CMake, GCC)
     - Documentation (LaTeX)
+- **Monitoring & Observability**: Full stack with Prometheus, Grafana, Loki, and Promtail.
+    - **Metrics**: Prometheus, Node Exporter, and cAdvisor.
+    - **Logging**: Loki for aggregation and Promtail for log-level extraction and Docker discovery.
 - **Home Automation**: Home Assistant (running in host network mode), Zigbee2MQTT, and Mosquitto.
 - **Media Stack**: Integrated suite (Jellyfin, Sonarr, Radarr, etc.) routed through a Gluetun VPN.
 - **Services**: Immich (Photos), Gitea (Git), Vaultwarden (Passwords), Bookstack (Documentation), AI Tools (Open WebUI), etc.
@@ -26,6 +29,7 @@ The project is organized into service-specific directories, each containing its 
 - `immich/`: Immich photo/video management solution.
 - `jenkins/`: Jenkins controller and specialized agents (`agent_0`, `agent_1`, `agent_2`).
 - `media_stack/`: Full media automation suite (Jellyfin, Arrs, qBit) with Gluetun VPN.
+- `monitoring/`: Prometheus, Grafana, Loki, and Promtail setup.
 - `qbittorent/`: Independent qBittorrent client (legacy/secondary).
 - `utils/`: Miscellaneous utility services.
 - `vaultwarden/`: Vaultwarden (formerly Bitwarden) password manager.
@@ -38,6 +42,15 @@ To start a service, navigate to its directory and use:
 docker-compose up -d
 ```
 *Note: Ensure you have a `.env` file in the service directory with the required variables (ports, paths, subnets, etc.) as they are ignored by Git.*
+
+### Monitoring & Logging
+The monitoring stack in `monitoring/` provides metrics and logs:
+- **Metrics**: Accessed via Grafana at `${GRAFANA_WEBUI_PORT}`.
+- **Logs**: Centralized in Loki. Use the following LogQL in Grafana Explore for a clean, identified view:
+  ```logql
+  {container=~".+"} | line_format "{{.container}} | {{.level}} | {{__line__}}"
+  ```
+- **Log Levels**: Promtail automatically extracts and standardizes levels (INFO, WARN, ERROR) from various log formats.
 
 ### Custom Builds
 Some services require a build step before they can be started:

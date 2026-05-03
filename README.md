@@ -87,6 +87,13 @@ The media stack is a tightly integrated suite of services for automated media ma
 - **[Seerr (Jellyseerr)](https://github.com/fallenbagel/jellyseerr)**: A request management and media discovery tool for Jellyfin.
 - **[Bazarr](https://www.bazarr.media/)**: Companion application to Sonarr and Radarr that manages and downloads subtitles.
 
+### Monitoring & Logging
+The lab features a comprehensive observability stack:
+- **[Prometheus](https://prometheus.io/)**: Core metrics collection and alerting.
+- **[Grafana](https://grafana.com/)**: Primary visualization dashboard for metrics and logs.
+- **[Loki](https://grafana.com/oss/loki/)**: Log aggregation system, seamlessly integrated into Grafana.
+- **[Promtail](https://grafana.com/docs/loki/latest/clients/promtail/)**: Log shipper configured for Docker auto-discovery and log-level extraction.
+
 ## Deployment & Maintenance
 
 ### Configuration
