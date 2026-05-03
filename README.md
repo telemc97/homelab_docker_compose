@@ -33,6 +33,12 @@ graph TD
             Immich["Immich"]
             Jenkins["Jenkins Controller"]
             AI["Open WebUI"]
+            subgraph MonitorStack ["Monitoring Stack"]
+                Prom["Prometheus"]
+                Graf["Grafana"]
+                Loki["Loki"]
+                Tail["Promtail"]
+            end
             subgraph MediaStack ["Media Stack (VPN Protected)"]
                 Gluetun["Gluetun (VPN)"]
                 qBit["qBittorrent"]
