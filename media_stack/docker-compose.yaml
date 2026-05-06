@@ -32,7 +32,7 @@ services:
       interval: 5s
       timeout: 10s
       retries: 1
-      start_period: 10s
+      start_period: 30s
     volumes:
       - ${BASE_PATH_GLUETUN}:/gluetun
     ports:
