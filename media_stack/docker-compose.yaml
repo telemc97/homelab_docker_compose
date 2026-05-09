@@ -25,8 +25,8 @@ services:
       - TZ=${TZ}
       - DOT=on
       - DOT_PROVIDERS=${DOT_PROVIDERS:-cloudflare,google}
-      - BLOCK_MALICIOUS=on
-      - DNS_KEEP_NAMESERVER=on
+      - BLOCK_MALICIOUS=off
+      - DNS_KEEP_NAMESERVER=off
     healthcheck:
       test: ["CMD", "/gluetun-entrypoint", "healthcheck"]
       interval: 5s
