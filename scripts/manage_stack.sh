@@ -76,11 +76,11 @@ find "$REPO_ROOT" -maxdepth 2 -name "docker-compose.yaml" | while read -r compos
 
     # Pull latest images as defined in the compose file
     echo "    Pulling images..."
-    docker-compose -f "$compose_filename" pull
+    docker compose -f "$compose_filename" pull
 
     # Start or update the containers in detached mode
     echo "    Starting containers..."
-    docker-compose -f "$compose_filename" up -d
+    docker compose -f "$compose_filename" up -d
 
     popd > /dev/null
     echo ">>> Done with $service_name"

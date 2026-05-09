@@ -39,7 +39,7 @@ The project is organized into service-specific directories, each containing its 
 ### General Usage
 To start a service, navigate to its directory and use:
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 *Note: Ensure you have a `.env` file in the service directory with the required variables (ports, paths, subnets, etc.) as they are ignored by Git.*
 
@@ -56,17 +56,17 @@ The monitoring stack in `monitoring/` provides metrics and logs:
 Some services require a build step before they can be started:
 - **Caddy**: Custom build with DuckDNS plugin.
   ```bash
-  cd caddy && docker-compose build
+  cd caddy && docker compose build
   ```
 - **Jenkins**: Custom controller (with plugins/Docker CLI) and specialized agents.
   ```bash
-  cd jenkins && docker-compose build
+  cd jenkins && docker compose build
   ```
 
 ## Development & Configuration Conventions
 
 ### Environment Variables
-- Extensive use of environment variables (`${VAR_NAME}`) in `docker-compose` files.
+- Extensive use of environment variables (`${VAR_NAME}`) in `docker compose` files.
 - Each service directory should have its own local `.env` file (globally ignored by `.gitignore`).
 - Common variables include `SUBNET`, `IPV4_ADDRESS`, `WEBUI_PORT`, and paths for data persistence.
 
